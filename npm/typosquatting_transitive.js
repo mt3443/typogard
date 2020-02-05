@@ -1,15 +1,13 @@
+// Transitive typosquatting analysis script. Intended to be run on the cluster.
+
 var itertools = require('itertools');
 var fs = require('fs');
-var levenshtein = require('fast-levenshtein');
 var csvjson = require('csvjson');
 var ls = require('npm-remote-ls').ls;
 var config = require('npm-remote-ls').config;
 
 // node name
 var node_name = process.argv[2];
-
-// starting index DEBUG
-// var starting_index = parseInt(process.argv[3]);
 
 // get packages that the node was assigned
 var machine_packages = fs.readFileSync('/users/m139t745/npm-analysis/typosquatting/transitive_package_names/' + node_name).toString().split(/\s+/);
@@ -421,15 +419,6 @@ function make_call(i) {
 
     });
 }
-
-// for all packages
-// get dependencies (async)
-// scan dependencies
-// find most popular typosquatting targets for each dependency
-    // record results
-
-
-// for cdf, count packages (A) with dependencies (B) that are typosquatting a package (C)
 
 // start analysis
 make_call(0);

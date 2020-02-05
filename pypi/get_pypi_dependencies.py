@@ -2,7 +2,7 @@ import requests
 import sys
 
 def get_dependencies(package):
-    dependencies = set()
+    dependencies = set([package])
     todo = [package]
 
     while len(todo) != 0:

@@ -12,18 +12,18 @@ x = list(range(0, 101))
 if not os.path.exists('y'):
     # raw data
     results = open('../data/transitive_results').read().splitlines()
-    download_counts = pd.read_csv('../data/downloads.csv')
+    download_counts = pd.read_csv('../data/npm_download_counts.csv')
     dl_count_dict = {}
 
-    if not os.path.exists('dl_counts_python_dict.pickle'):
+    if not os.path.exists('dl_count_dict.pickle'):
 
         for i in range(len(download_counts)):
             dl_count_dict[download_counts.iloc[i].package_name] = download_counts.iloc[i].weekly_downloads
 
-        pickle.dump(dl_count_dict, open('dl_counts_python_dict.pickle', 'wb'))
+        pickle.dump(dl_count_dict, open('dl_count_dict.pickle', 'wb'))
 
     else:
-        dl_count_dict = pickle.load(open('dl_counts_python_dict.pickle', 'rb'))
+        dl_count_dict = pickle.load(open('dl_count_dict.pickle', 'rb'))
 
     # percentage of packages typosquatting
     y = []
@@ -71,9 +71,13 @@ if not os.path.exists('y'):
                 if t_dl_count >= popular_dl_count:
                     count += 1
 
-        y.append(count / total_number_of_packages * 100)
+                    # move on, 1 package with 10 possibly typosquatting dependencies is 1 alert, not 10
+                    break
+
+        y.append(count)
 
     pickle.dump(y, open('y', 'wb'))
+
 else:
     y = pickle.load(open('y', 'rb'))
 

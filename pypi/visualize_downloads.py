@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-df = pd.read_csv('../data/npm_download_counts.csv')
+df = pd.read_csv('../data/pypi_download_counts.csv')
 
 download_counts = list(df.weekly_downloads.values)
 
@@ -59,7 +59,7 @@ def pie():
             loc='center left',
             bbox_to_anchor=(1, 0, 0.5, 1))
             
-    ax.set_title('Percentage of NPM Packages by Weekly Download Count')
+    ax.set_title('Percentage of PyPI Packages by Weekly Download Count')
 
     plt.show()
 

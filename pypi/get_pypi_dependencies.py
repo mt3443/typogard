@@ -32,7 +32,6 @@ def get_dependencies(package):
 
             except:
                 print('Unhandled exception when processing {}'.format(package_name))
-                pass
 
     return list(dependencies)
 

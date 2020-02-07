@@ -1,5 +1,11 @@
 var itertools = require('itertools');
 var fs = require('fs');
+var ls = require('npm-remote-ls').ls;
+var config = require('npm-remote-ls').config;
+
+config({
+    development: false
+});
 
 // package name delimiter regex
 var delimiter_regex = /[\-|\.|_]/g;
@@ -325,4 +331,44 @@ function run_tests(package_name) {
     }
 }
 
-module.exports = {scan_package: run_tests};
+function clean_deps(dependency_tree) {
+    
+    let temp_set = new Set();
+
+    for (let package of dependency_tree) {
+
+        // remove version number
+        let package_name = null;
+        if (package[0] == '@') {
+            let at_index = package.indexOf('@', 1);
+            package_name = package.substring(0, at_index);
+        } else {
+            package_name = package.split('@')[0];
+        }
+
+        // add package name to set
+        temp_set.add(package_name);
+
+    }
+
+    return temp_set;
+}
+
+ls(process.argv[2], 'latest', true, (r) => {
+    let packages = clean_deps(r);
+    let alert = false;
+
+    for (let p of packages) {
+        let result = run_tests(p);
+
+        if (result != null) {
+            alert = true;
+            console.log('dependency "' + p + '" could be typosquatting "' + result[0] + '"');
+        }
+    }
+
+    if (alert == false) {
+        console.log('No typosquatting detected for ' + process.argv[2]);
+    }
+    
+});

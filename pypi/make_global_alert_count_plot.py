@@ -4,21 +4,21 @@ import pickle
 import os
 
 # total number of packages processed, from _all_docs.json
-total_number_of_packages = 1187059
+total_number_of_packages = 204276
 
 # results pickle file name
-output_filename = '../pickle/npm_global_alert_output.p'
+output_filename = '../pickle/pypi_global_alert_output.p'
 
 # download counts python dictionary pickle name
-dl_count_dict_pickle_name = '../pickle/npm_dl_count_dict.p'
+dl_count_dict_pickle_name = '../pickle/pypi_dl_count_dict.p'
 
 # percentage of top packages to be considered popular
 x = list(range(0, 101))
 
 if not os.path.exists(output_filename):
     # raw data
-    results = open('../data/transitive_results').read().splitlines()
-    download_counts = pd.read_csv('../data/npm_download_counts.csv')
+    results = open('../data/pypi_transitive_results').read().splitlines()
+    download_counts = pd.read_csv('../data/pypi_download_counts.csv')
     dl_count_dict = {}
 
     if not os.path.exists(dl_count_dict_pickle_name):
@@ -95,9 +95,9 @@ else:
 
 plt.rcParams['figure.figsize'] = (10, 8)
 plt.plot(x, y)
-plt.title('Global Weekly Alerts (NPM)')
+plt.title('Global Weekly Alerts (PyPI)')
 plt.xlabel('Percentage of packages considered popular')
-plt.ylabel('Number of alerts')
+plt.ylabel('Number of alerts per week')
 plt.xlim(0, 100)
-plt.ylim(0, 8e7)
+plt.ylim(0, 5e7)
 plt.show()

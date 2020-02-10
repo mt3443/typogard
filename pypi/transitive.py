@@ -9,7 +9,6 @@ print('Loading packages...', flush=True)
 df = pd.read_csv('../data/pypi_download_counts.csv')
 all_packages = list(df.package_name.values)
 random.shuffle(all_packages)
-del all_packages_json
 
 # remove package names that have already been analyzed
 if os.path.exists('/volatile/m139t745/pypi_transitive_output'):

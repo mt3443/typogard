@@ -2,12 +2,10 @@ import json
 import os
 import re
 import random
-import pandas as pd
 
 # get all packages
 print('Loading packages...', flush=True)
-df = pd.read_csv('../data/pypi_download_counts.csv')
-all_packages = list(df.package_name.values)
+all_packages = open('/users/m139t745/typosquatting/data/pypi_dependencies').read().splitlines()
 random.shuffle(all_packages)
 
 # remove package names that have already been analyzed

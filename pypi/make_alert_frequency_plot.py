@@ -3,22 +3,22 @@ import pandas as pd
 import pickle
 import os
 
-# total number of packages processed, from _all_docs.json
-total_number_of_packages = 1187059
+# total number of packages processed
+total_number_of_packages = 204276
 
 # file name for pickled results
-output_filename = '../pickle/npm_alert_frequency_plot.p'
+output_filename = '../pickle/pypi_alert_frequency_plot.p'
 
 # download count dict pickled object
-dl_count_dict_pickle_name = '../pickle/npm_dl_count_dict.p'
+dl_count_dict_pickle_name = '../pickle/pypi_dl_count_dict.p'
 
 # percentage of top packages to be considered popular
 x = list(range(0, 101))
 
 if not os.path.exists(output_filename):
     # raw data
-    results = open('../data/transitive_results').read().splitlines()
-    download_counts = pd.read_csv('../data/npm_download_counts.csv')
+    results = open('../data/pypi_transitive_results').read().splitlines()
+    download_counts = pd.read_csv('../data/pypi_download_counts.csv')
     dl_count_dict = {}
 
     if not os.path.exists(dl_count_dict_pickle_name):
@@ -89,7 +89,7 @@ else:
 
 plt.rcParams['figure.figsize'] = (10, 8)
 plt.plot(x, y)
-plt.title('NPM Transitive Typosquatting')
+plt.title('PyPI Transitive Typosquatting')
 plt.xlabel('Percentage of top packages considered popular')
 plt.ylabel('Number of packages that would trigger alert')
 plt.xlim(0, 100)

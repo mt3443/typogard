@@ -1,8 +1,13 @@
 import requests
 import sys
+import re
+
+extra_re = re.compile('^.*;.*extra\s*==.*$')
+
+allowed_chars = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_')
 
 def get_dependencies(package):
-    dependencies = set([package])
+    dependencies = set()
     todo = [package]
 
     while len(todo) != 0:
@@ -17,17 +22,23 @@ def get_dependencies(package):
                 metadata = r.json()
                 deps = metadata['info']['requires_dist']
 
+                dependencies.add(package_name)
+
                 if deps is None:
                     continue
 
-                for d in deps:
-                    d_name = d.split()[0]
+                for d_name in deps:
 
-                    if d_name[-1] == ';':
-                        d_name = d_name[:-1]
+                    # ignore extra dependencies
+                    if extra_re.match(d_name) is not None:
+                        continue
                     
-                    if d_name not in dependencies:
-                        dependencies.add(d_name)
+                    for i, char in enumerate(d_name):
+                        if char not in allowed_chars:
+                            d_name = d_name[:i]
+                            break
+
+                    if d_name not in dependencies and d_name not in todo:
                         todo.append(d_name)
 
             except:
@@ -42,7 +53,6 @@ def main():
         exit(1)
 
     print(get_dependencies(sys.argv[1]))
-
 
 if __name__ == '__main__':
     main()

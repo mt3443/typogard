@@ -9,6 +9,7 @@ version_number_regex = re.compile('^(.*?)[\.|\-|_]?\d+$')
 scope_regex = re.compile('^@(.*?)/.+$')
 
 typos = {
+    '@': ['', '2', 'a', '1', 'q', 'w', 'e', '3'],
     '1': ['2', 'w', 'q', 'i', 'l'],
     '2': ['1', 'q', 'w', 'e', '3'],
     '3': ['2', 'w', 'e', 'r', '4'],
@@ -51,7 +52,7 @@ typos = {
     '/': ['1', 'l', 'i']
 }
 
-popular_packages = set(open('../data/npm_popular_packages').read().splitlines())
+popular_packages = set(open('../data/pypi_popular_packages').read().splitlines())
 
 # check if two packages have the same scope
 def same_scope(p1, p2):
@@ -104,9 +105,6 @@ def swapped_words(package_name):
     if delimiter_regex.search(package_name) is not None:
         tokens = delimiter_regex.sub(' ', package_name).split()
 
-        if len(tokens) > 8:
-            return None
-
         for p in permutations(tokens):
             for d in delimiters:
                 s = d.join(p)
@@ -157,7 +155,7 @@ def run_tests(package_name):
             version_numbers(package_name)
         ]
 
-        results = list(filter(lambda x: x is not None and x is not '', results))
+        results = list(filter(lambda x: x is not None, results))
 
         if len(results) != 0:
             return results

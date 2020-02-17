@@ -9,47 +9,45 @@ version_number_regex = re.compile('^(.*?)[\.|\-|_]?\d+$')
 scope_regex = re.compile('^@(.*?)/.+$')
 
 typos = {
-    '@': ['', '2', 'a', '1', 'q', 'w', 'e', '3'],
-    '1': ['2', 'w', 'q', 'i', 'l'],
-    '2': ['1', 'q', 'w', 'e', '3'],
-    '3': ['2', 'w', 'e', 'r', '4'],
-    '4': ['3', 'e', 'r', 't', '5', 'a'],
-    '5': ['4', 'r', 't', 'y', '6', 's'],
-    '6': ['5', 't', 'y', 'u', '7'],
-    '7': ['6', 'y', 'u', 'i', '8'],
-    '8': ['7', 'u', 'i', 'o', '9'],
-    '9': ['8', 'i', 'o', 'p', '0'],
-    '0': ['9', 'o', 'p', '-', '_'],
+    '1': ['2', 'q', 'i', 'l'],
+    '2': ['1', 'q', 'w', '3'],
+    '3': ['2', 'w', 'e', '4'],
+    '4': ['3', 'e', 'r', '5'],
+    '5': ['4', 'r', 't', '6', 's'],
+    '6': ['5', 't', 'y', '7'],
+    '7': ['6', 'y', 'u', '8'],
+    '8': ['7', 'u', 'i', '9'],
+    '9': ['8', 'i', 'o', '0'],
+    '0': ['9', 'o', 'p', '-'],
     '-': ['_', '0', 'p', '.', ''],
     '_': ['-', '0', 'p', '.', ''],
-    'q': ['1', '2', 'w', 's', 'a'],
-    'w': ['1', '2', '3', 'e', 'd', 's', 'a', 'q', 'vv'],
-    'e': ['2', '3', '4', 'r', 'f', 'd', 's', 'w'],
-    'r': ['3', '4', '5', 't', 'g', 'f', 'd', 'e'],
-    't': ['4', '5', '6', 'y', 'h', 'g', 'f', 'r'],
-    'y': ['5', '6', '7', 'u', 'j', 'h', 'g', 't', 'i'],
-    'u': ['6', '7', '8', 'i', 'k', 'j', 'h', 'y', 'v'],
-    'i': ['1', '7', '8', '9', 'o', 'l', 'k', 'j', 'u', 'y'],
-    'o': ['8', '9', '0', 'p', 'l', 'k', 'i'],
-    'p': ['9', '0', '-', '_', 'l', 'o'],
-    'a': ['q', 'w', 's', 'x', 'z'],
-    's': ['q', 'w', 'e', 'd', 'c', 'x', 'z', 'a', '5'],
-    'd': ['w', 'e', 'r', 'f', 'v', 'c', 'x', 's'],
-    'f': ['e', 'r', 't', 'g', 'b', 'v', 'c', 'd'],
-    'g': ['r', 't', 'y', 'h', 'n', 'b', 'v', 'f'],
-    'h': ['t', 'y', 'u', 'j', 'm', 'n', 'b', 'g'],
-    'j': ['y', 'u', 'i', 'k', 'm', 'n', 'h'],
-    'k': ['u', 'i', 'o', 'l', 'm', 'j'],
+    'q': ['1', '2', 'w', 'a'],
+    'w': ['2', '3', 'e', 's', 'a', 'q', 'vv'],
+    'e': ['3', '4', 'r', 'd', 's', 'w'],
+    'r': ['4', '5', 't', 'f', 'd', 'e'],
+    't': ['5', '6', 'y', 'g', 'f', 'r'],
+    'y': ['6', '7', 'u', 'h', 't', 'i'],
+    'u': ['7', '8', 'i', 'j', 'y', 'v'],
+    'i': ['1', '8', '9', 'o', 'l', 'k', 'j', 'u', 'y'],
+    'o': ['9', '0', 'p', 'l', 'i'],
+    'p': ['0', '-', 'o'],
+    'a': ['q', 'w', 's', 'z'],
+    's': ['w', 'd', 'x', 'z', 'a', '5'],
+    'd': ['e', 'r', 'f', 'c', 'x', 's'],
+    'f': ['r', 'g', 'v', 'c', 'd'],
+    'g': ['t', 'h', 'b', 'v', 'f'],
+    'h': ['y', 'j', 'n', 'b', 'g'],
+    'j': ['u', 'i', 'k', 'm', 'n', 'h'],
+    'k': ['i', 'o', 'l', 'm', 'j'],
     'l': ['i', 'o', 'p', 'k', '1'],
     'z': ['a', 's', 'x'],
-    'x': ['z', 'a', 's', 'd', 'c'],
-    'c': ['x', 's', 'd', 'f', 'v'],
-    'v': ['c', 'd', 'f', 'g', 'b', 'u'],
-    'b': ['v', 'f', 'g', 'h', 'n'],
-    'n': ['b', 'g', 'h', 'j', 'm'],
-    'm': ['n', 'h', 'j', 'k', 'rn'],
-    '.': ['-', '_', ''],
-    '/': ['1', 'l', 'i']
+    'x': ['z', 's', 'd', 'c'],
+    'c': ['x', 'd', 'f', 'v'],
+    'v': ['c', 'f', 'g', 'b', 'u'],
+    'b': ['v', 'g', 'h', 'n'],
+    'n': ['b', 'h', 'j', 'm'],
+    'm': ['n', 'j', 'k', 'rn'],
+    '.': ['-', '_', '']
 }
 
 popular_packages = set(open('../data/pypi_popular_packages').read().splitlines())
@@ -105,6 +103,9 @@ def swapped_words(package_name):
     if delimiter_regex.search(package_name) is not None:
         tokens = delimiter_regex.sub(' ', package_name).split()
 
+        if len(tokens) > 8:
+            return None
+
         for p in permutations(tokens):
             for d in delimiters:
                 s = d.join(p)
@@ -155,12 +156,32 @@ def run_tests(package_name):
             version_numbers(package_name)
         ]
 
-        results = list(filter(lambda x: x is not None, results))
+        results = list(filter(lambda x: x is not None and x is not '', results))
 
         if len(results) != 0:
             return results
 
     return None
+
+# get results corresponding to each signal
+def run_tests_get_signals(package_name):
+if package_name not in popular_packages:
+
+    results = [
+        repeated_characters(package_name),
+        omitted_chars(package_name),
+        swapped_characters(package_name),
+        swapped_words(package_name),
+        common_typos(package_name),
+        version_numbers(package_name)
+    ]
+
+    results = list(filter(lambda x: x is not None and x is not '', results))
+
+    if len(results) != 0:
+        return results
+
+return None
 
 if __name__ == '__main__':
     import sys

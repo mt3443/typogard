@@ -4,7 +4,7 @@ import re
 delimiter_regex = re.compile('[\-|\.|_]')
 delimiters = ['', '.', '-', '_']
 
-version_number_regex = re.compile('^(.*?)[\.|\-|_]?\d+$')
+version_number_regex = re.compile('^(.*?)[\.|\-|_]?\d$')
 
 scope_regex = re.compile('^@(.*?)/.+$')
 
@@ -50,7 +50,12 @@ typos = {
     '.': ['-', '_', '']
 }
 
+# Set containing the names of all packages considered to be popular
 popular_packages = set(open('../data/pypi_popular_packages').read().splitlines())
+
+# pandas dataframe containing the names and download counts of all packages, call scan_all_init to initialize
+packages_df = None
+all_packages = None
 
 # check if two packages have the same scope
 def same_scope(p1, p2):
@@ -63,27 +68,46 @@ def same_scope(p1, p2):
     return p1_match.group(1) == p2_match.group(1)
 
 # 'reeaaaccct' => 'react'
-def repeated_characters(package_name):
+def repeated_characters(package_name, package_list=popular_packages):
     s = ''.join([i[0] for i in groupby(package_name)])
     
-    if s in popular_packages and not same_scope(package_name, s):
+    if s in package_list and not same_scope(package_name, s):
         return s
 
     return None
         
 # 'event-streaem' => 'event-stream'
 # 'event-stream' => 'event-strem'
-def omitted_chars(package_name):
+def omitted_chars(package_name, return_all=False, package_list=popular_packages):
+
+    if len(package_name) < 7:
+        return None
+
+    if return_all:
+        candidates = []
+
     for i in range(len(package_name) - 1):
         s = package_name[:i] + package_name[(i + 1):]
 
-        if s in popular_packages and not same_scope(package_name, s):
-            return s
+        if s in package_list and not same_scope(package_name, s):
+            if return_all:
+                candidates.append(s)
+            else:
+                return s
+
+    if return_all and candidates != []:
+        return candidates
 
     return None
 
+    
+
 # 'loadsh' => 'lodash'
-def swapped_characters(package_name):
+def swapped_characters(package_name, return_all=False, package_list=popular_packages):
+
+    if return_all:
+        candidates = []
+
     for i in range(len(package_name) - 1):
         a = list(package_name)
         t = a[i]
@@ -91,15 +115,25 @@ def swapped_characters(package_name):
         a[i + 1] = t
         s = ''.join(a)
 
-        if s in popular_packages and not same_scope(package_name, s):
-            return s
+        if s in package_list and not same_scope(package_name, s):
+            if return_all:
+                candidates.append(s)
+            else:
+                return s
+
+    if return_all and candidates != []:
+        return candidates
 
     return None
 
 # 'stream-event' => 'event-stream'
 # 'event.stream' => 'event-stream'
 # 'de-bug' => 'debug'
-def swapped_words(package_name):
+def swapped_words(package_name, return_all=False, package_list=popular_packages):
+
+    if return_all:
+        candidates = []
+
     if delimiter_regex.search(package_name) is not None:
         tokens = delimiter_regex.sub(' ', package_name).split()
 
@@ -110,14 +144,24 @@ def swapped_words(package_name):
             for d in delimiters:
                 s = d.join(p)
 
-                if s in popular_packages and not same_scope(package_name, s):
-                    return s
+                if s in package_list and not same_scope(package_name, s):
+                    if return_all:
+                        candidates.append(s)
+                    else:
+                        return s
+
+    if return_all and candidates != []:
+        return candidates
 
     return None
 
 # '1odash' => 'lodash'
 # 'teqeusts' => 'requests'
-def common_typos(package_name):
+def common_typos(package_name, return_all=False, package_list=popular_packages):
+
+    if return_all:
+        candidates = []
+
     for i, c in enumerate(package_name):
         if c in typos:
             for t in typos[c]:
@@ -125,20 +169,26 @@ def common_typos(package_name):
                 s[i] = t
                 s = ''.join(s)
 
-                if s in popular_packages and not same_scope(package_name, s):
-                    return s
+                if s in package_list and not same_scope(package_name, s):
+                    if return_all:
+                        candidates.append(s)
+                    else:
+                        return s
+
+    if return_all and candidates != []:
+        return candidates
 
     return None
 
 # 'react-2' => 'react'
 # 'react2' => 'react'
-def version_numbers(package_name):
+def version_numbers(package_name, package_list=popular_packages):
     m = version_number_regex.match(package_name)
 
     if m is not None:
         s = m.group(1)
 
-        if s in popular_packages and not same_scope(package_name, s):
+        if s in package_list and not same_scope(package_name, s):
             return s
 
     return None
@@ -156,32 +206,154 @@ def run_tests(package_name):
             version_numbers(package_name)
         ]
 
+        # remove None's
         results = list(filter(lambda x: x is not None and x is not '', results))
+
+        # flatten
+        r = []
+        for s in results:
+            if type(s) == list:
+                for e in s:
+                    r.append(e)
+            else:
+                r.append(s)
+
+        results = list(set(r))
 
         if len(results) != 0:
             return results
 
     return None
 
-# get results corresponding to each signal
-def run_tests_get_signals(package_name):
-if package_name not in popular_packages:
+# run all tests on given package name, return potential typosquatting targets
+def run_tests_show_all(package_name):
+
+    if all_packages is None:
+        scan_all_init()
 
     results = [
-        repeated_characters(package_name),
-        omitted_chars(package_name),
-        swapped_characters(package_name),
-        swapped_words(package_name),
-        common_typos(package_name),
-        version_numbers(package_name)
+        repeated_characters(package_name, package_list=all_packages),
+        omitted_chars(package_name, return_all=True, package_list=all_packages),
+        swapped_characters(package_name, return_all=True, package_list=all_packages),
+        swapped_words(package_name, return_all=True, package_list=all_packages),
+        common_typos(package_name, return_all=True, package_list=all_packages),
+        version_numbers(package_name, package_list=all_packages)
     ]
 
+    # remove None's
     results = list(filter(lambda x: x is not None and x is not '', results))
+
+    # flatten
+    r = []
+    for s in results:
+        if type(s) == list:
+            for e in s:
+                r.append(e)
+        else:
+            r.append(s)
+
+    results = list(set(r))
 
     if len(results) != 0:
         return results
 
-return None
+    return None
+
+# get results corresponding to each signal
+def run_tests_get_signals(package_name):
+    if package_name not in popular_packages:
+
+        return {
+            'repeated_chars': repeated_characters(package_name),
+            'omitted_chars': omitted_chars(package_name),
+            'swapped_chars': swapped_characters(package_name),
+            'swapped_words': swapped_words(package_name),
+            'common_typos': common_typos(package_name),
+            'version_numbers': version_numbers(package_name)
+        }
+    
+    else:
+
+        return None
+
+# set up tools required for scanning all packages
+def scan_all_init():
+    global pd
+    import pandas as pd
+
+    global packages_df
+    packages_df = pd.read_csv('../data/pypi_download_counts.csv')
+
+    global all_packages
+    all_packages = set(packages_df.package_name.values)
+
+# gets download count for given package
+def get_download_count(package_name):
+    if packages_df is None:
+        scan_all_init()
+
+    if package_name not in packages_df.package_name.values:
+        return 0
+
+    return packages_df.loc[packages_df.package_name == package_name].weekly_downloads.values[0]
+
+# scan all pacakges for transitive results
+def scan_all(dependencies_filename, transitive_output_filename):
+    
+    # get most popular typosquatting target for every package in the given list
+    lines = open(dependencies_filename).read().splitlines()
+
+    log = open(transitive_output_filename, 'a')
+
+    for line in lines:
+        tokens = line.split(',')
+        package_name = tokens[0]
+        dependencies = tokens[1:]
+
+        final_string = package_name
+
+        for dependency in dependencies:
+            candidates = run_tests_show_all(dependency)
+
+            if candidates != None:
+                # get most popular target
+                most_popular_candidate = candidates[0]
+                popularity = get_download_count(candidates[0])
+                for c in candidates:
+                    if get_download_count(c) > popularity:
+                        most_popular_candidate = c
+                        popularity = get_download_count(c)
+
+                final_string += (',' + dependency + ',' + most_popular_candidate)
+
+        final_string += '\n'
+
+        log.write(final_string)
+
+    log.close()
+
+# get signal count statistics
+def get_signal_counts():
+    
+    if all_packages is None:
+        scan_all_init()
+
+    log = open('../data/pypi_signal_counts', 'w')
+    log.write('package_name,repeated_characters,omitted_characters,swapped_characters,swapped_words,common_typos,version_numbers\n')
+
+    for package in all_packages:
+        package_name = str(package)
+        results = run_tests_get_signals(package_name)
+
+        if results is not None:
+            if set(results.values()) != {None}:
+                final_string = package_name
+                final_string += ',' + ','.join(['n/a' if x is None else x for x in results.values()])
+                final_string += '\n'
+
+                log.write(final_string)
+
+    log.close()
 
 if __name__ == '__main__':
     import sys

@@ -1,2 +1,5 @@
 data/npm_transitive_results
+data/pypi_transitive_results
+data/npm_dependencies
+data/pypi_dependencies
 __pycache__

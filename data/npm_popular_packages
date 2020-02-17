@@ -167,7 +167,6 @@ tunnel-agent
 to-regex-range
 expand-brackets
 eslint-scope
-
 component-emitter
 sprintf-js
 is-stream
@@ -199,7 +198,6 @@ escape-string-regexp
 postcss-value-parser
 decamelize
 brace-expansion
-
 parse5
 verror
 regexpu-core

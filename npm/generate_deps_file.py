@@ -75,14 +75,13 @@ if not os.path.isdir('npm_dependencies'):
 else:
     os.system('rm -rf npm_dependencies/*')
 
-packages_per_core = int(total_packages / total_cores) + 1
+packages_per_node = int(total_packages / len(nodes_cores)) + 1
 
 # assign packages
 print('Assigning packages...', flush=True)
 for node in nodes_cores:
-    packages_for_this_node = packages_per_core * int(nodes_cores[node])
     f = open('npm_dependencies/{}'.format(node), 'w')
-    for _ in range(packages_for_this_node):
+    for _ in range(packages_per_node):
         if (len(all_packages) == 0):
             break
         f.write('{}\n'.format(all_packages.pop()))

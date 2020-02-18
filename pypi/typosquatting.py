@@ -1,4 +1,5 @@
 from itertools import groupby, permutations
+from functools import lru_cache
 import re
 
 delimiter_regex = re.compile('[\-|\.|_]')
@@ -51,7 +52,7 @@ typos = {
 }
 
 # Set containing the names of all packages considered to be popular
-popular_packages = set(open('../data/npm_popular_packages').read().splitlines())
+popular_packages = set(open('../data/pypi_popular_packages').read().splitlines())
 
 # pandas dataframe containing the names and download counts of all packages, call scan_all_init to initialize
 packages_df = None
@@ -71,7 +72,7 @@ def same_scope(p1, p2):
 def repeated_characters(package_name, package_list=popular_packages):
     s = ''.join([i[0] for i in groupby(package_name)])
     
-    if s in package_list and not same_scope(package_name, s):
+    if s in package_list and not same_scope(package_name, s) and s != package_name:
         return s
 
     return None
@@ -86,10 +87,10 @@ def omitted_chars(package_name, return_all=False, package_list=popular_packages)
     if return_all:
         candidates = []
 
-    for i in range(len(package_name) - 1):
+    for i in range(len(package_name)):
         s = package_name[:i] + package_name[(i + 1):]
 
-        if s in package_list and not same_scope(package_name, s):
+        if s in package_list and not same_scope(package_name, s) and s != package_name:
             if return_all:
                 candidates.append(s)
             else:
@@ -99,8 +100,6 @@ def omitted_chars(package_name, return_all=False, package_list=popular_packages)
         return candidates
 
     return None
-
-    
 
 # 'loadsh' => 'lodash'
 def swapped_characters(package_name, return_all=False, package_list=popular_packages):
@@ -115,7 +114,7 @@ def swapped_characters(package_name, return_all=False, package_list=popular_pack
         a[i + 1] = t
         s = ''.join(a)
 
-        if s in package_list and not same_scope(package_name, s):
+        if s in package_list and not same_scope(package_name, s) and s != package_name:
             if return_all:
                 candidates.append(s)
             else:
@@ -144,7 +143,7 @@ def swapped_words(package_name, return_all=False, package_list=popular_packages)
             for d in delimiters:
                 s = d.join(p)
 
-                if s in package_list and not same_scope(package_name, s):
+                if s in package_list and not same_scope(package_name, s) and s != package_name:
                     if return_all:
                         candidates.append(s)
                     else:
@@ -169,7 +168,7 @@ def common_typos(package_name, return_all=False, package_list=popular_packages):
                 s[i] = t
                 s = ''.join(s)
 
-                if s in package_list and not same_scope(package_name, s):
+                if s in package_list and not same_scope(package_name, s) and s != package_name:
                     if return_all:
                         candidates.append(s)
                     else:
@@ -188,7 +187,7 @@ def version_numbers(package_name, package_list=popular_packages):
     if m is not None:
         s = m.group(1)
 
-        if s in package_list and not same_scope(package_name, s):
+        if s in package_list and not same_scope(package_name, s) and s != package_name:
             return s
 
     return None
@@ -282,10 +281,16 @@ def scan_all_init():
     import pandas as pd
 
     global packages_df
-    packages_df = pd.read_csv('../data/npm_download_counts.csv')
+    packages_df = pd.read_csv('../data/pypi_download_counts.csv')
 
     global all_packages
     all_packages = set(packages_df.package_name.values)
+
+    global threading
+    import threading
+
+    global lock
+    lock = threading.Lock()
 
 # gets download count for given package
 def get_download_count(package_name):
@@ -297,14 +302,32 @@ def get_download_count(package_name):
 
     return packages_df.loc[packages_df.package_name == package_name].weekly_downloads.values[0]
 
-# scan all pacakges for transitive results
-def scan_all(dependencies_filename, transitive_output_filename):
-    
-    # get most popular typosquatting target for every package in the given list
-    lines = open(dependencies_filename).read().splitlines()
+# split list into evenly sized chunks
+def chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
 
-    log = open(transitive_output_filename, 'a')
+# returns the most popular package with a name that could be typosquatting the given package
+@lru_cache(maxsize=10000)
+def get_most_popular_candidate(package_name):
+    candidates = run_tests_show_all(dependency)
 
+    if candidates is None:
+        return None
+
+    # get most popular target
+    most_popular_candidate = candidates[0]
+    popularity = get_download_count(candidates[0])
+    for c in candidates:
+        if get_download_count(c) > popularity:
+            most_popular_candidate = c
+            popularity = get_download_count(c)
+
+    return most_popular_candidate
+
+# thread target function used to scan all packages
+def scan_all_thread_target(lines, log):
     for line in lines:
         tokens = line.split(',')
         package_name = tokens[0]
@@ -313,22 +336,40 @@ def scan_all(dependencies_filename, transitive_output_filename):
         final_string = package_name
 
         for dependency in dependencies:
-            candidates = run_tests_show_all(dependency)
+            
+            candidate = get_most_popular_candidate(dependency)
 
-            if candidates != None:
-                # get most popular target
-                most_popular_candidate = candidates[0]
-                popularity = get_download_count(candidates[0])
-                for c in candidates:
-                    if get_download_count(c) > popularity:
-                        most_popular_candidate = c
-                        popularity = get_download_count(c)
-
-                final_string += (',' + dependency + ',' + most_popular_candidate)
+            if candidate is not None:
+                final_string += (',' + dependency + ',' + candidate)
 
         final_string += '\n'
 
+        lock.acquire()
         log.write(final_string)
+        lock.release()
+
+# scan all pacakges for transitive results
+def scan_all(dependencies_filename, transitive_output_filename):
+    
+    if all_packages is None:
+        scan_all_init()
+
+    n_threads = 16
+    threads = []
+
+    # get most popular typosquatting target for every package in the given list
+    lines = open(dependencies_filename).read().splitlines()
+    log = open(transitive_output_filename, 'w')
+    all_chunks = chunks(lines, int(len(lines) / n_threads) + 1)
+
+    for _ in range(n_threads):
+        current_chunk = next(all_chunks)
+        t = threading.Thread(target=scan_all_thread_target, args=(current_chunk,log,))
+        t.start()
+        threads.append(t)
+
+    for t in threads:
+        t.join()
 
     log.close()
 
@@ -338,7 +379,7 @@ def get_signal_counts():
     if all_packages is None:
         scan_all_init()
 
-    log = open('../data/npm_signal_counts', 'w')
+    log = open('../data/pypi_signal_counts', 'w')
     log.write('package_name,repeated_characters,omitted_characters,swapped_characters,swapped_words,common_typos,version_numbers\n')
 
     for package in all_packages:
@@ -354,6 +395,7 @@ def get_signal_counts():
                 log.write(final_string)
 
     log.close()
+
 
 if __name__ == '__main__':
     import sys

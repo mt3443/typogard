@@ -1,3 +1,5 @@
+# Gets all transitive dependencies of a single given package
+
 import requests
 import sys
 import re

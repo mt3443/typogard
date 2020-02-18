@@ -5,30 +5,20 @@ import random
 
 # get all packages
 print('Loading packages...', flush=True)
-all_packages = open('/users/m139t745/typosquatting/data/pypi_dependencies').read().splitlines()
+all_packages = open('../data/pypi_dependencies').read().splitlines()
 random.shuffle(all_packages)
 
 # remove package names that have already been analyzed
-if os.path.exists('/volatile/m139t745/pypi_transitive_output'):
+if os.path.exists('/volatile/m139t745/pypi_transitive'):
     print('Removing processed packages...', flush=True)
-    all_packages_set = set(all_packages)
+    preprocessed = set()
 
-    for f in os.listdir('/volatile/m139t745/pypi_transitive_output'):
-        file_contents = open('/volatile/m139t745/pypi_transitive_output/' + f).read()
-
-        if file_contents[-1] != '\n':
-            file_contents = file_contents[:file_contents.rfind('\n')]
-            writer = open('/volatile/m139t745/pypi_transitive_output/' + f, 'w')
-            writer.write(file_contents + '\n')
-            writer.close()
+    for f in os.listdir('/volatile/m139t745/pypi_transitive'):
+        file_contents = open('/volatile/m139t745/pypi_transitive/' + f).read()
 
         for line in file_contents.splitlines():
             package = line.split(',')[0]
-            if package in all_packages_set:
-                all_packages_set.remove(package)
-
-    all_packages = list(all_packages_set)
-    del all_packages_set
+            preprocessed.add(package)
 
 print('Getting cluster info...', flush=True)
 os.system('scontrol show node > node_info')
@@ -67,13 +57,13 @@ for node in unused_nodes:
     nodes_cores[name] = n_cores
     total_cores += int(n_cores)
 
-if not os.path.isdir('/volatile/m139t745/pypi_transitive_output'):
-    os.mkdir('/volatile/m139t745/pypi_transitive_output')
+if not os.path.isdir('/volatile/m139t745/pypi_transitive'):
+    os.mkdir('/volatile/m139t745/pypi_transitive')
 
-if not os.path.isdir('transitive_package_names'):
-    os.mkdir('transitive_package_names')
+if not os.path.isdir('cluster_input'):
+    os.mkdir('cluster_input')
 else:
-    os.system('rm -rf transitive_package_names/*')
+    os.system('rm -rf cluster_input/*')
 
 packages_per_core = int(total_packages / total_cores) + 1
 
@@ -81,15 +71,18 @@ packages_per_core = int(total_packages / total_cores) + 1
 print('Assigning packages...', flush=True)
 for node in nodes_cores:
     packages_for_this_node = packages_per_core * int(nodes_cores[node])
-    f = open('transitive_package_names/{}'.format(node), 'w')
+    f = open('cluster_input/{}'.format(node), 'w')
     for _ in range(packages_for_this_node):
         if (len(all_packages) == 0):
             break
-        f.write('{}\n'.format(all_packages.pop()))
+        p = all_packages.pop()
+        if p.split(',')[0] in preprocessed:
+            continue
+        f.write('{}\n'.format(p))
     f.close()
 
 # start clients
 for node in nodes_cores:
-    os.system('srun -N 1 -n 1 -c {} -w {} --mem-per-cpu=2G -- python3 start_transitive.py {} {} &'.format(nodes_cores[node], node, node, nodes_cores[node]))
+    os.system('srun -N 1 -n 1 -c {} -w {} --mem-per-cpu=2G -- python3 get_transitive_output.py {} {} &'.format(nodes_cores[node], node, node, nodes_cores[node]))
 
 print('Job started')

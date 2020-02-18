@@ -1,3 +1,5 @@
+# Generates pypi_download_counts.csv
+
 import requests
 from bs4 import BeautifulSoup
 import threading

@@ -1,3 +1,5 @@
+# Generates the plot showing the number of real-world alerts that can be expected in a given week depending on how many packages are considered popular
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle

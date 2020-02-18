@@ -1,3 +1,5 @@
+# Generates the plot showing the number of alerts depending on the number of packages considered popular
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle

@@ -1,3 +1,5 @@
+# Generates the pypi_dependencies file which shows all transitive dependencies for all packages on PyPI
+
 from get_pypi_dependencies import get_dependencies
 import pandas as pd
 import threading

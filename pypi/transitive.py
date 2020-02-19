@@ -5,7 +5,7 @@ import random
 
 # get all packages
 print('Loading packages...', flush=True)
-all_packages = open('../data/pypi_dependencies').read().splitlines()
+all_packages = open('/volatile/m139t745/pypi_dependencies').read().splitlines()
 random.shuffle(all_packages)
 
 # remove package names that have already been analyzed

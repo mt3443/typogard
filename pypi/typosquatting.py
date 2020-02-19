@@ -402,6 +402,9 @@ if __name__ == '__main__':
     if sys.argv[1] is None:
         print('Usage: py typosquatting_transitive.py [package_name]')
         exit(1)
-    r = run_tests(sys.argv[1])
-    if r is not None:
-        print('"{}" could be typosquatting {}'.format(sys.argv[1], set(r)))
+    from get_pypi_dependencies import get_dependencies
+    dependencies = get_dependencies(sys.argv[1])
+    for dependency in dependencies:
+        r = run_tests(sys.argv[1])
+        if r is not None:
+            print('Dependency "{}" could be typosquatting {}'.format(dependency, set(r)))

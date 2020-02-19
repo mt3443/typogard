@@ -34,14 +34,19 @@ def t(packages):
 
 				lock.acquire()
 				log.write('{},{}\n'.format(package_name, weekly_downloads))
-				counter += 1
-				if counter == 100:
-					log.flush()
-					counter = 0
+				# counter += 1
+				# if counter == 100:
+				# 	log.flush()
+				# 	counter = 0
+				log.flush()
 				lock.release()
 
+			else: 
+				
+				console.log('Package {} returned status code {}'.format(package_name, r.status_code))
+
 		except:
-			continue
+			console.log('Unexpected error when processing {}'.format(package_name))
 
 threads = []
 all_chunks = chunks(all_packages, int(len(all_packages) / n_threads) + 1)

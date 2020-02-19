@@ -410,6 +410,14 @@ if __name__ == '__main__':
     if sys.argv[1] is None:
         print('Usage: py typosquatting_transitive.py [package_name]')
         exit(1)
-    r = run_tests(sys.argv[1])
-    if r is not None:
-        print('"{}" could be typosquatting {}'.format(sys.argv[1], set(r)))
+    import subprocess
+    stdout = subprocess.check_output('node get_npm_deps_cli.js {}'.format(sys.argv[1]), shell=True).decode('utf8')
+    dependencies = stdout.split('Dependencies:\n')[1].splitlines()
+    alert = False
+    for dependency in dependencies:
+        r = run_tests(dependency)
+        if r is not None:
+            alert = True
+            print('Dependency \'{}\' could be typosquatting {}'.format(dependency, set(r)))
+    if alert == False:
+        print('No typosquatting detected for \'{}\''.format(sys.argv[1]))

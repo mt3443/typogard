@@ -8,6 +8,9 @@ import typosquatting
 df = pd.read_csv('../data/npm_download_counts.csv')
 names = list(df.package_name.values)
 weights = list(df.weekly_downloads.values)
+weights_total = sum(weights)
+for i, v in enumerate(weights):
+    weights[i] = v / weights_total
 n = 10000
 sample = choice(names, n, False, weights)
 output_file = open('../data/npm_sample', 'w')

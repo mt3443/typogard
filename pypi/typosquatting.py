@@ -404,7 +404,11 @@ if __name__ == '__main__':
         exit(1)
     from get_pypi_dependencies import get_dependencies
     dependencies = get_dependencies(sys.argv[1])
+    alert = False
     for dependency in dependencies:
         r = run_tests(sys.argv[1])
         if r is not None:
-            print('Dependency "{}" could be typosquatting {}'.format(dependency, set(r)))
+            alert = True
+            print('Dependency \'{}\' could be typosquatting {}'.format(dependency, set(r)))
+    if alert == False:
+        print('No typosquatting detected for \'{}\''.format(sys.argv[1]))

@@ -14,7 +14,7 @@ def chunks(lst, n):
 
 all_packages = open('/users/m139t745/typosquatting/npm/cluster_input/{}'.format(node_name)).read().splitlines()
 
-log = open('/volatile/m139t745/npm_downloads/{}'.format(node_name), 'w')
+log = open('/volatile/m139t745/npm_downloads/{}'.format(node_name), 'a')
 counter = 0
 downloads_url = 'https://api.npmjs.org/downloads/point/last-week/{}'
 

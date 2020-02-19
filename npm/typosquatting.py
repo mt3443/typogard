@@ -311,7 +311,7 @@ def chunks(lst, n):
 # returns the most popular package with a name that could be typosquatting the given package
 @lru_cache(maxsize=10000)
 def get_most_popular_candidate(package_name):
-    candidates = run_tests_show_all(dependency)
+    candidates = run_tests_show_all(package_name)
 
     if candidates is None:
         return None

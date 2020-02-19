@@ -329,6 +329,8 @@ def get_most_popular_candidate(package_name):
 # thread target function used to scan all packages
 def scan_all_thread_target(lines, log):
 
+    counter = 0
+
     for line in lines:
         tokens = line.split(',')
         package_name = tokens[0]
@@ -347,7 +349,11 @@ def scan_all_thread_target(lines, log):
 
         lock.acquire()
         log.write(final_string)
-        log.flush()
+        counter += 1
+
+        if counter == 100:
+            log.flush()
+            counter = 0
         lock.release()
 
 # scan all pacakges for transitive results

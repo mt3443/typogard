@@ -25,7 +25,8 @@ def t(packages):
 			r = requests.get(downloads_url.format(package_name))
 
 			while r.status_code == 429:
-				time.sleep(1)
+				print('Package {} waiting, 429'.format(package_name))
+				time.sleep(30)
 				r = requests.get(downloads_url.format(package_name))
 
 			if r.status_code == 200:

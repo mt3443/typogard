@@ -6,7 +6,7 @@ import requests
 
 # get all packages
 print('Loading packages...', flush=True)
-if not os.path.exists('_all_docs.json')
+if not os.path.exists('_all_docs.json'):
 	all_docs_request = requests.get('https://replicate.npmjs.com/_all_docs')
 
 	if all_docs_request.status_code != 200:

@@ -7,7 +7,4 @@ import os
 node_name = sys.argv[1]
 
 os.system('rm -rf /dev/shm/pypi')
-os.system('mkdir /dev/shm/pypi')
-typosquatting.scan_all('cluster_input/{}'.format(node_name), '/dev/shm/pypi/transitive_output')
-os.system('cat /dev/shm/pypi/transitive_output >> /volatile/m139t745/pypi_transitive/{}'.format(node_name))
-os.system('rm -rf /dev/shm/pypi')
+typosquatting.scan_all('cluster_input/{}'.format(node_name), '/volatile/m139t745/pypi_transitive/{}'.format(node_name))

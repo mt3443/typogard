@@ -17,7 +17,7 @@ if not os.path.exists('_all_docs.json'):
 		f.write(all_docs_request.content)
 
 all_docs = json.load(open('_all_docs.json'))
-all_packages = [x['id'] for x in all_docs_json['rows']]
+all_packages = [x['id'] for x in all_docs['rows']]
 random.shuffle(all_packages)
 
 # remove package names that have already been analyzed

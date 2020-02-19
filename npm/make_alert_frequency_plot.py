@@ -3,8 +3,8 @@ import pandas as pd
 import pickle
 import os
 
-# total number of packages processed, from _all_docs.json
-total_number_of_packages = 1187059
+# total number of packages processed
+total_number_of_packages = 1174840
 
 # file name for pickled results
 output_filename = '../pickle/npm_alert_frequency_plot.p'
@@ -17,7 +17,7 @@ x = list(range(0, 101))
 
 if not os.path.exists(output_filename):
     # raw data
-    results = open('../data/transitive_results').read().splitlines()
+    results = open('../data/npm_transitive_results').read().splitlines()
     download_counts = pd.read_csv('../data/npm_download_counts.csv')
     dl_count_dict = {}
 

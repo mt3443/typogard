@@ -36,5 +36,9 @@ function clean_deps(dependency_tree) {
 }
 
 ls(package_name, 'latest', true, (r) => {
-    console.log(clean_deps(r));
+    let dependencies = clean_deps(r);
+    console.log('Dependencies:')
+    for (let dependency of dependencies) {
+        console.log(dependency);
+    }
 });

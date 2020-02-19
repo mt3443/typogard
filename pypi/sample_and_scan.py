@@ -20,6 +20,7 @@ for package_name in sample:
             alert = True
             break
     
-    output_file.write('{},{}\n'.format(package_name, 'yes' if alert else 'no')
+    output_file.write('{},{}\n'.format(package_name, 'yes' if alert else 'no'))
+    output_file.flush()
 
 output_file.close()

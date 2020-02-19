@@ -6,7 +6,7 @@ import pickle
 import os
 
 # total number of packages processed
-total_number_of_packages = 204276
+total_number_of_packages = 204275
 
 # file name for pickled results
 output_filename = '../pickle/pypi_alert_frequency_plot.p'

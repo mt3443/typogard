@@ -5,8 +5,8 @@ import pandas as pd
 import pickle
 import os
 
-# total number of packages processed, from _all_docs.json
-total_number_of_packages = 204276
+# total number of packages processed
+total_number_of_packages = 204275
 
 # results pickle file name
 output_filename = '../pickle/pypi_global_alert_output.p'

@@ -7,8 +7,6 @@ delimiters = ['', '.', '-', '_']
 
 version_number_regex = re.compile('^(.*?)[\.|\-|_]?\d$')
 
-scope_regex = re.compile('^@(.*?)/.+$')
-
 typos = {
     '1': ['2', 'q', 'i', 'l'],
     '2': ['1', 'q', 'w', '3'],
@@ -58,21 +56,15 @@ popular_packages = set(open('../data/pypi_popular_packages').read().splitlines()
 packages_df = None
 all_packages = None
 
-# check if two packages have the same scope
-def same_scope(p1, p2):
-    p1_match = scope_regex.match(p1)
-    p2_match = scope_regex.match(p2)
-
-    if p1_match is None or p2_match is None:
-        return False
-
-    return p1_match.group(1) == p2_match.group(1)
+# check if two packages have the same name given the python module naming conventions
+def same_name(p1, p2):
+    return re.sub(r'[-_.]+', '-', p1).lower() == re.sub(r'[-_.]+', '-', p2).lower()
 
 # 'reeaaaccct' => 'react'
 def repeated_characters(package_name, package_list=popular_packages):
     s = ''.join([i[0] for i in groupby(package_name)])
     
-    if s in package_list and not same_scope(package_name, s) and s != package_name:
+    if s in package_list and not same_name(package_name, s):
         return s
 
     return None
@@ -90,7 +82,7 @@ def omitted_chars(package_name, return_all=False, package_list=popular_packages)
     for i in range(len(package_name)):
         s = package_name[:i] + package_name[(i + 1):]
 
-        if s in package_list and not same_scope(package_name, s) and s != package_name:
+        if s in package_list and not same_name(package_name, s):
             if return_all:
                 candidates.append(s)
             else:
@@ -114,7 +106,7 @@ def swapped_characters(package_name, return_all=False, package_list=popular_pack
         a[i + 1] = t
         s = ''.join(a)
 
-        if s in package_list and not same_scope(package_name, s) and s != package_name:
+        if s in package_list and not same_name(package_name, s):
             if return_all:
                 candidates.append(s)
             else:
@@ -143,7 +135,7 @@ def swapped_words(package_name, return_all=False, package_list=popular_packages)
             for d in delimiters:
                 s = d.join(p)
 
-                if s in package_list and not same_scope(package_name, s) and s != package_name:
+                if s in package_list and not same_name(package_name, s):
                     if return_all:
                         candidates.append(s)
                     else:
@@ -168,7 +160,7 @@ def common_typos(package_name, return_all=False, package_list=popular_packages):
                 s[i] = t
                 s = ''.join(s)
 
-                if s in package_list and not same_scope(package_name, s) and s != package_name:
+                if s in package_list and not same_name(package_name, s):
                     if return_all:
                         candidates.append(s)
                     else:
@@ -187,7 +179,7 @@ def version_numbers(package_name, package_list=popular_packages):
     if m is not None:
         s = m.group(1)
 
-        if s in package_list and not same_scope(package_name, s) and s != package_name:
+        if s in package_list and not same_name(package_name, s):
             return s
 
     return None

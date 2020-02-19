@@ -43,10 +43,10 @@ def t(packages):
 
 			else: 
 				
-				console.log('Package {} returned status code {}'.format(package_name, r.status_code))
+				print('Package {} returned status code {}'.format(package_name, r.status_code))
 
 		except:
-			console.log('Unexpected error when processing {}'.format(package_name))
+			print('Unexpected error when processing {}'.format(package_name))
 
 threads = []
 all_chunks = chunks(all_packages, int(len(all_packages) / n_threads) + 1)

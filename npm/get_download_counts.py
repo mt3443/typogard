@@ -4,7 +4,7 @@ import sys
 import time
 
 node_name = sys.argv[1]
-n_threads = 8
+n_threads = 16
 lock = threading.Lock()
 
 def chunks(lst, n):
@@ -25,7 +25,7 @@ def t(packages):
 			r = requests.get(downloads_url.format(package_name))
 
 			while r.status_code == 429:
-				time.sleep(30)
+				time.sleep(1)
 				r = requests.get(downloads_url.format(package_name))
 
 			if r.status_code == 200:
@@ -34,11 +34,10 @@ def t(packages):
 
 				lock.acquire()
 				log.write('{},{}\n'.format(package_name, weekly_downloads))
-				# counter += 1
-				# if counter == 100:
-				# 	log.flush()
-				# 	counter = 0
-				log.flush()
+				counter += 1
+				if counter == 100:
+					log.flush()
+					counter = 0
 				lock.release()
 
 			else: 

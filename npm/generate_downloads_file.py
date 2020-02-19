@@ -24,15 +24,9 @@ if os.path.exists('/volatile/m139t745/npm_downloads'):
     all_packages_set = set(all_packages)
 
     for f in os.listdir('/volatile/m139t745/npm_downloads'):
-        file_contents = open('/volatile/m139t745/npm_downloads/' + f).read()
+        file_contents = open('/volatile/m139t745/npm_downloads/' + f).read().splitlines()
 
-        if file_contents[-1] != '\n':
-            file_contents = file_contents[:file_contents.rfind('\n')]
-            writer = open('/volatile/m139t745/npm_downloads/' + f, 'w')
-            writer.write(file_contents + '\n')
-            writer.close()
-
-        for line in file_contents.splitlines():
+        for line in file_contents:
             package = line.split(',')[0]
             if package in all_packages_set:
                 all_packages_set.remove(package)

@@ -6,7 +6,7 @@ import threading
 import os
 
 n_threads = 32
-output_filename = '../data/pypi_download_counts.csv'
+output_filename = '../data/pypi_download_counts_new.csv'
 lock = threading.Lock()
 
 response = requests.get('https://pypi.org/simple/')
@@ -42,7 +42,7 @@ print('Getting weekly download counts for {} packages'.format(len(all_packages))
 def get_counts(packages):
     for package_name in packages:
         try:
-            downloads_response = requests.get('https://pypistats.org/api/packages/{}/recent?period=week'.format(package_name.lower()))
+            downloads_response = requests.get('https://pypistats.org/api/packages/{}/recent'.format(package_name.lower()))
 
             if downloads_response.status_code != 200:
                 print('download count request for {} returned status code {}'.format(package_name, downloads_response.status_code))

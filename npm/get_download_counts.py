@@ -6,7 +6,7 @@ import os
 import json
 
 node_name = sys.argv[1]
-n_threads = 16
+n_threads = 32
 lock = threading.Lock()
 
 def chunks(lst, n):
@@ -24,8 +24,7 @@ def get_download_counts(packages):
 		r = requests.get(downloads_url.format(package_name))
 
 		while r.status_code == 429:
-			print('Package {} waiting, 429'.format(package_name))
-			time.sleep(10)
+			time.sleep(2)
 			r = requests.get(downloads_url.format(package_name))
 
 		if r.status_code == 200:

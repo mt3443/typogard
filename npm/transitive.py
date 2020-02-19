@@ -5,13 +5,13 @@ import random
 
 # get all packages
 print('Loading packages...', flush=True)
-all_packages = open('../data/npm_dependencies').read().splitlines()
+all_packages = open('/volatile/m139t745/npm_dependencies').read().splitlines()
 random.shuffle(all_packages)
 
 # remove package names that have already been analyzed
+preprocessed = set()
 if os.path.exists('/volatile/m139t745/npm_transitive'):
     print('Removing processed packages...', flush=True)
-    preprocessed = set()
 
     for f in os.listdir('/volatile/m139t745/npm_transitive'):
         file_contents = open('/volatile/m139t745/npm_transitive/' + f).read()

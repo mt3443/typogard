@@ -9,9 +9,9 @@ all_packages = open('../data/pypi_dependencies').read().splitlines()
 random.shuffle(all_packages)
 
 # remove package names that have already been analyzed
+preprocessed = set()
 if os.path.exists('/volatile/m139t745/pypi_transitive'):
     print('Removing processed packages...', flush=True)
-    preprocessed = set()
 
     for f in os.listdir('/volatile/m139t745/pypi_transitive'):
         file_contents = open('/volatile/m139t745/pypi_transitive/' + f).read()

@@ -6,17 +6,19 @@ import requests
 
 # get all packages
 print('Loading packages...', flush=True)
-all_docs_request = requests.get('https://replicate.npmjs.com/_all_docs')
+if not os.path.exists('_all_docs.json')
+	all_docs_request = requests.get('https://replicate.npmjs.com/_all_docs')
 
-if all_docs_request.status_code != 200:
-	print('Error: all_docs request returned status code {}'.format(all_docs_request.status_code))
-	exit(1)
+	if all_docs_request.status_code != 200:
+		print('Error: all_docs request returned status code {}'.format(all_docs_request.status_code))
+		exit(1)
 
-all_docs_json = all_docs_request.json()
+	with open('_all_docs.json', 'w') as f:
+		f.write(all_docs_request.content)
+
+all_docs = json.load(open('_all_docs.json'))
 all_packages = [x['id'] for x in all_docs_json['rows']]
 random.shuffle(all_packages)
-del all_docs_json
-del all_docs_request
 
 # remove package names that have already been analyzed
 if os.path.exists('/volatile/m139t745/npm_downloads'):

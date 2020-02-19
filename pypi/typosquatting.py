@@ -367,7 +367,7 @@ def scan_all(dependencies_filename, transitive_output_filename, threads):
 
     # get most popular typosquatting target for every package in the given list
     lines = open(dependencies_filename).read().splitlines()
-    log = open(transitive_output_filename, 'w')
+    log = open(transitive_output_filename, 'a')
     all_chunks = chunks(lines, int(len(lines) / n_threads) + 1)
 
     for _ in range(n_threads):

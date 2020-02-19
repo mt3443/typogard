@@ -328,6 +328,7 @@ def get_most_popular_candidate(package_name):
 
 # thread target function used to scan all packages
 def scan_all_thread_target(lines, log):
+
     for line in lines:
         tokens = line.split(',')
         package_name = tokens[0]
@@ -346,6 +347,7 @@ def scan_all_thread_target(lines, log):
 
         lock.acquire()
         log.write(final_string)
+        log.flush()
         lock.release()
 
 # scan all pacakges for transitive results
@@ -354,7 +356,7 @@ def scan_all(dependencies_filename, transitive_output_filename):
     if all_packages is None:
         scan_all_init()
 
-    n_threads = 16
+    n_threads = sys.argv[2]
     threads = []
 
     # get most popular typosquatting target for every package in the given list

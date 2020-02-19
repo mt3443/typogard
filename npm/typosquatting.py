@@ -351,12 +351,12 @@ def scan_all_thread_target(lines, log):
         lock.release()
 
 # scan all pacakges for transitive results
-def scan_all(dependencies_filename, transitive_output_filename):
+def scan_all(dependencies_filename, transitive_output_filename, threads):
     
     if all_packages is None:
         scan_all_init()
 
-    n_threads = sys.argv[2]
+    n_threads = threads
     threads = []
 
     # get most popular typosquatting target for every package in the given list

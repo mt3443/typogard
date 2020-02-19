@@ -5,8 +5,7 @@ import time
 import os
 import json
 
-node_name = sys.argv[1]
-n_threads = 32
+n_threads = 16
 lock = threading.Lock()
 
 def chunks(lst, n):
@@ -14,8 +13,21 @@ def chunks(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
 
-all_packages = open('/users/m139t745/typosquatting/npm/cluster_input/{}'.format(node_name)).read().splitlines()
-log = open('/volatile/m139t745/npm_downloads/{}'.format(node_name), 'a')
+if os.path.exists('_all_docs.json'):
+	all_packages = [x['id'] for x in json.load(open('_all_docs.json'))['rows']]
+else:
+	all_packages = [x['id'] for x in requests.get('https://replicate.npmjs.com/_all_docs').json()['rows']]
+
+if os.path.exists('../data/npm_downloads'):
+	all_packages = set(all_packages)
+	for line in open('../data/npm_downloads').read().splitlines():
+		p = line.split(',')[0]
+		if p in all_packages:
+			all_packages.remove(p)
+	all_packages = list(all_packages)
+
+# log = open('/volatile/m139t745/npm_downloads/{}'.format(node_name), 'a')
+log = open('../data/npm_downloads', 'a')
 downloads_url = 'https://api.npmjs.org/downloads/point/last-week/{}'
 
 def get_download_counts(packages):

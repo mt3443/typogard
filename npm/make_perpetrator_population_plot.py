@@ -4,9 +4,6 @@ import pandas as pd
 import pickle
 import os
 
-# total number of packages processed
-total_number_of_packages = 1174840
-
 # results pickle file name
 output_filename = '../pickle/npm_perp_pop_output.p'
 

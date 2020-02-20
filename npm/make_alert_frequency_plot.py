@@ -3,9 +3,6 @@ import pandas as pd
 import pickle
 import os
 
-# total number of packages processed
-total_number_of_packages = 1174840
-
 # file name for pickled results
 output_filename = '../pickle/npm_alert_frequency_plot.p'
 
@@ -34,15 +31,15 @@ if not os.path.exists(output_filename):
     # percentage of packages typosquatting
     y = []
 
+    # total number of packages processed
+    total_number_of_packages = len(dl_count_dict)
+
     for percentage in x:
         print(percentage, flush=True)
         # get popularity cutoff package
-        threshold = int(total_number_of_packages * (percentage / 100))
+        threshold = int(total_number_of_packages * (percentage / 100)) - 1
 
-        if percentage in [99, 100]:
-            popular_dl_count = 0
-        else:
-            popular_dl_count = download_counts.iloc[threshold]['weekly_downloads']
+        popular_dl_count = download_counts.iloc[threshold]['weekly_downloads']
 
         # find number of packages that could be typosquatting something above the threshold
         count = 0

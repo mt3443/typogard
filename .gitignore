@@ -2,4 +2,6 @@ data/npm_transitive_results
 data/pypi_transitive_results
 data/npm_dependencies
 data/pypi_dependencies
+pickle/npm_dl_count_dict.p
+pickle/pypi_dl_count_dict.p
 __pycache__

@@ -9,13 +9,15 @@ output_filename = '../pickle/npm_alert_frequency_plot.p'
 # download count dict pickled object
 dl_count_dict_pickle_name = '../pickle/npm_dl_count_dict.p'
 
-# percentage of top packages to be considered popular
-x = list(range(0, 101))
+# x axis values, popularity threshold
+x_begin = 350
+x_end = 1000000
+x = list(range(x_begin, x_end, int((x_end - x_begin) / 100)))
 
 if not os.path.exists(output_filename):
     # raw data
     results = open('../data/npm_transitive_results').read().splitlines()
-    download_counts = pd.read_csv('../data/npm_download_counts.csv')
+    download_counts = pd.read_csv('../data/npm_download_counts.csv', na_filter=False)
     dl_count_dict = {}
 
     if not os.path.exists(dl_count_dict_pickle_name):
@@ -34,12 +36,10 @@ if not os.path.exists(output_filename):
     # total number of packages processed
     total_number_of_packages = len(dl_count_dict)
 
-    for percentage in x:
-        print(percentage, flush=True)
-        # get popularity cutoff package
-        threshold = int(total_number_of_packages * (percentage / 100)) - 1
+    for threshold in x:
+        print(threshold, flush=True)
 
-        popular_dl_count = download_counts.iloc[threshold]['weekly_downloads']
+        popular_dl_count = threshold
 
         # find number of packages that could be typosquatting something above the threshold
         count = 0
@@ -84,10 +84,22 @@ if not os.path.exists(output_filename):
 else:
     y = pickle.load(open(output_filename, 'rb'))
 
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+import numpy as np
+
+x = np.array(x)
+y = np.array(y)
+
+poly_reg = PolynomialFeatures()
+x_poly = poly_reg.fit_transform(x.reshape(-1, 1))
+y_poly = LinearRegression().fit(x_poly, y.reshape(-1, 1)).predict(x_poly)
+
 plt.rcParams['figure.figsize'] = (10, 8)
 plt.plot(x, y)
+plt.plot(x, y_poly)
 plt.title('NPM Transitive Typosquatting')
-plt.xlabel('Percentage of top packages considered popular')
-plt.ylabel('Number of packages that would trigger alert')
-plt.xlim(0, 100)
+plt.xlabel('Popularity Threshold (Weekly Downloads)')
+plt.ylabel('Number of packages that trigger alerts')
+plt.xlim(x_begin, x_end)
 plt.show()

@@ -3,18 +3,27 @@ import pandas as pd
 import pickle
 import os
 
+import sys
+
+if sys.argv[1] is None:
+    exit()
+
 # results pickle file name
-output_filename = '../pickle/npm_global_alert_output.p'
+output_filename = '../pickle/npm_global_alert_output_{}.p'.format(sys.argv[1])
+output_filename_pypi = '../pickle/pypi_global_alert_output_{}.p'.format(sys.argv[1])
 
 # download counts python dictionary pickle name
 dl_count_dict_pickle_name = '../pickle/npm_dl_count_dict.p'
 
-# x axis values, popularity threshold
-x_begin = 350
-x_end = 1000000
-x = list(range(x_begin, x_end, int((x_end - x_begin) / 100)))
+total_npm_weekly_downloads = 17000000000
 
 if not os.path.exists(output_filename):
+
+    # x axis values, popularity threshold
+    x_begin = 350
+    x_end = 1000000
+    x = list(range(x_begin, x_end, int((x_end - x_begin) / 100)))
+
     # raw data
     results = open('../data/npm_transitive_results').read().splitlines()
     download_counts = pd.read_csv('../data/npm_download_counts.csv', na_filter=False)
@@ -83,12 +92,13 @@ if not os.path.exists(output_filename):
                     # dont count the same package twice
                     break
 
-        y.append(count)
+        y.append(count / total_npm_weekly_downloads * 100)
 
-    pickle.dump(y, open(output_filename, 'wb'))
+    pickle.dump((x_begin, x_end, x, y), open(output_filename, 'wb'))
 
 else:
-    y = pickle.load(open(output_filename, 'rb'))
+    x_begin, x_end, x, y = pickle.load(open(output_filename, 'rb'))
+    pypi_x_begin, pypi_x_end, pypi_x, pypi_y = pickle.load(open(output_filename_pypi, 'rb'))
 
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
@@ -101,11 +111,21 @@ poly_reg = PolynomialFeatures()
 x_poly = poly_reg.fit_transform(x.reshape(-1, 1))
 y_poly = LinearRegression().fit(x_poly, y.reshape(-1, 1)).predict(x_poly)
 
+pypi_x = np.array(pypi_x)
+pypi_y = np.array(pypi_y)
+
+poly_reg = PolynomialFeatures()
+pypi_x_poly = poly_reg.fit_transform(pypi_x.reshape(-1, 1))
+pypi_y_poly = LinearRegression().fit(pypi_x_poly, pypi_y.reshape(-1, 1)).predict(pypi_x_poly)
+
 plt.rcParams['figure.figsize'] = (10, 8)
-plt.plot(x, y)
-plt.plot(x, y_poly)
-plt.title('Global Weekly Alerts (NPM)')
+plt.rcParams.update({'font.size': 18})
+plt.plot(x, y, color='red', label='npm')
+# plt.plot(x, y_poly)
+plt.plot(pypi_x, pypi_y, color='blue', label='PyPI')
+# plt.title('Percentage of Downloads that Trigger Alerts vs Popularity')
 plt.xlabel('Popularity Threshold (Weekly Downloads)')
-plt.ylabel('Number of alerts')
+plt.ylabel('Typosquatting Downloads (% of All Downloads)')
 plt.xlim(x_begin, x_end)
+plt.legend()
 plt.show()

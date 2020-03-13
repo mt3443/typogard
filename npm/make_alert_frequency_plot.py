@@ -3,18 +3,25 @@ import pandas as pd
 import pickle
 import os
 
+import sys
+
+if sys.argv[1] is None:
+    exit()
+
 # file name for pickled results
-output_filename = '../pickle/npm_alert_frequency_plot.p'
+output_filename = '../pickle/npm_alert_frequency_plot_{}.p'.format(sys.argv[1])
+output_filename_pypi = '../pickle/pypi_alert_frequency_plot_{}.p'.format(sys.argv[1])
 
 # download count dict pickled object
 dl_count_dict_pickle_name = '../pickle/npm_dl_count_dict.p'
 
-# x axis values, popularity threshold
-x_begin = 350
-x_end = 1000000
-x = list(range(x_begin, x_end, int((x_end - x_begin) / 100)))
-
 if not os.path.exists(output_filename):
+
+    # x axis values, popularity threshold
+    x_begin = 350
+    x_end = 1000000
+    x = list(range(x_begin, x_end, int((x_end - x_begin) / 100)))
+
     # raw data
     results = open('../data/npm_transitive_results').read().splitlines()
     download_counts = pd.read_csv('../data/npm_download_counts.csv', na_filter=False)
@@ -77,29 +84,40 @@ if not os.path.exists(output_filename):
                     # move on, 1 package with 10 possibly typosquatting dependencies is 1 alert, not 10
                     break
 
-        y.append(count)
+        y.append(count / total_number_of_packages * 100)
 
-    pickle.dump(y, open(output_filename, 'wb'))
+    pickle.dump((x_begin, x_end, x, y), open(output_filename, 'wb'))
 
 else:
-    y = pickle.load(open(output_filename, 'rb'))
+    npm_x_begin, npm_x_end, npm_x, npm_y = pickle.load(open(output_filename, 'rb'))
+    pypi_x_begin, pypi_x_end, pypi_x, pypi_y = pickle.load(open(output_filename_pypi, 'rb'))
 
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 import numpy as np
 
-x = np.array(x)
-y = np.array(y)
+npm_x = np.array(npm_x)
+npm_y = np.array(npm_y)
 
 poly_reg = PolynomialFeatures()
-x_poly = poly_reg.fit_transform(x.reshape(-1, 1))
-y_poly = LinearRegression().fit(x_poly, y.reshape(-1, 1)).predict(x_poly)
+npm_x_poly = poly_reg.fit_transform(npm_x.reshape(-1, 1))
+npm_y_poly = LinearRegression().fit(npm_x_poly, npm_y.reshape(-1, 1)).predict(npm_x_poly)
+
+pypi_x = np.array(pypi_x)
+pypi_y = np.array(pypi_y)
+
+poly_reg = PolynomialFeatures()
+pypi_x_poly = poly_reg.fit_transform(pypi_x.reshape(-1, 1))
+pypi_y_poly = LinearRegression().fit(pypi_x_poly, pypi_y.reshape(-1, 1)).predict(pypi_x_poly)
 
 plt.rcParams['figure.figsize'] = (10, 8)
-plt.plot(x, y)
-plt.plot(x, y_poly)
-plt.title('NPM Transitive Typosquatting')
+plt.rcParams.update({'font.size': 18})
+plt.plot(npm_x, npm_y, color='red', label='npm')
+# plt.plot(npm_x, npm_y_poly)
+plt.plot(pypi_x, pypi_y, color='blue', label='PyPI')
+# plt.title('Percent Typosquatting vs Target Popularity')
 plt.xlabel('Popularity Threshold (Weekly Downloads)')
-plt.ylabel('Number of packages that trigger alerts')
-plt.xlim(x_begin, x_end)
+plt.ylabel('Typosquatting Perpetrators (% of All Packages)')
+plt.xlim(npm_x_begin, npm_x_end)
+plt.legend()
 plt.show()

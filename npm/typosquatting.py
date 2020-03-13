@@ -388,7 +388,7 @@ def get_signal_counts():
         scan_all_init()
 
     log = open('../data/npm_signal_counts', 'w')
-    log.write('package_name,repeated_characters,omitted_characters,swapped_characters,swapped_words,common_typos,version_numbers\n')
+    log.write('package_name,weekly_downloads,repeated_characters,omitted_characters,swapped_characters,swapped_words,common_typos,version_numbers\n')
 
     for package in all_packages:
         package_name = str(package)
@@ -396,8 +396,8 @@ def get_signal_counts():
 
         if results is not None:
             if set(results.values()) != {None}:
-                final_string = package_name
-                final_string += ',' + ','.join(['n/a' if x is None else x for x in results.values()])
+                final_string = package_name + ',' + str(get_download_count(package_name))
+                final_string += ',' + ','.join(['' if x is None else x for x in results.values()])
                 final_string += '\n'
 
                 log.write(final_string)

@@ -5,18 +5,24 @@ import pandas as pd
 import pickle
 import os
 
+import sys
+
+if sys.argv[1] is None:
+    exit()
+
 # file name for pickled results
-output_filename = '../pickle/pypi_alert_frequency_plot.p'
+output_filename = '../pickle/pypi_alert_frequency_plot_{}.p'.format(sys.argv[1])
 
 # download count dict pickled object
 dl_count_dict_pickle_name = '../pickle/pypi_dl_count_dict.p'
 
-# x axis values, popularity threshold
-x_begin = 350
-x_end = 1000000
-x = list(range(x_begin, x_end, int((x_end - x_begin) / 500)))
-
 if not os.path.exists(output_filename):
+
+    # x axis values, popularity threshold
+    x_begin = 350
+    x_end = 1000000
+    x = list(range(x_begin, x_end, int((x_end - x_begin) / 100)))
+
     # raw data
     results = open('../data/pypi_transitive_results').read().splitlines()
     download_counts = pd.read_csv('../data/pypi_download_counts.csv', na_filter=False)
@@ -79,12 +85,12 @@ if not os.path.exists(output_filename):
                     # move on, 1 package with 10 possibly typosquatting dependencies is 1 alert, not 10
                     break
 
-        y.append(count)
+        y.append(count / total_number_of_packages * 100)
 
-    pickle.dump(y, open(output_filename, 'wb'))
+    pickle.dump((x_begin, x_end, x, y), open(output_filename, 'wb'))
 
 else:
-    y = pickle.load(open(output_filename, 'rb'))
+    x_begin, x_end, x, y = pickle.load(open(output_filename, 'rb'))
 
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
@@ -100,8 +106,8 @@ y_poly = LinearRegression().fit(x_poly, y.reshape(-1, 1)).predict(x_poly)
 plt.rcParams['figure.figsize'] = (10, 8)
 plt.plot(x, y)
 plt.plot(x, y_poly)
-plt.title('PyPI Transitive Typosquatting')
-plt.xlabel('Percentage of top packages considered popular')
-plt.ylabel('Number of packages that would trigger alert')
+plt.title('Percent Typosquatting vs Target Popularity (PyPI)')
+plt.xlabel('Popularity Threshold (Number of Weekly Downloads)')
+plt.ylabel('Percentage of All Packages Found Typosquatting (%)')
 plt.xlim(x_begin, x_end)
 plt.show()

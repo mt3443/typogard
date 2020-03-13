@@ -3,18 +3,26 @@ import pandas as pd
 import pickle
 import os
 
+import sys
+
+if sys.argv[1] is None:
+    exit()
+
 # results pickle file name
-output_filename = '../pickle/pypi_global_alert_output.p'
+output_filename = '../pickle/pypi_global_alert_output_{}.p'.format(sys.argv[1])
 
 # download counts python dictionary pickle name
 dl_count_dict_pickle_name = '../pickle/pypi_dl_count_dict.p'
 
-# x axis values, popularity threshold
-x_begin = 350
-x_end = 1000000
-x = list(range(x_begin, x_end, int((x_end - x_begin) / 500)))
+total_pypi_weekly_downloads = 982000000
 
 if not os.path.exists(output_filename):
+
+    # x axis values, popularity threshold
+    x_begin = 350
+    x_end = 1000000
+    x = list(range(x_begin, x_end, int((x_end - x_begin) / 500)))
+
     # raw data
     results = open('../data/pypi_transitive_results').read().splitlines()
     download_counts = pd.read_csv('../data/pypi_download_counts.csv', na_filter=False)
@@ -83,12 +91,12 @@ if not os.path.exists(output_filename):
                     # dont count the same package twice
                     break
 
-        y.append(count)
+        y.append(count / total_pypi_weekly_downloads * 100)
 
-    pickle.dump(y, open(output_filename, 'wb'))
+    pickle.dump((x_begin, x_end, x, y), open(output_filename, 'wb'))
 
 else:
-    y = pickle.load(open(output_filename, 'rb'))
+    x_begin, x_end, x, y = pickle.load(open(output_filename, 'rb'))
 
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
@@ -104,8 +112,8 @@ y_poly = LinearRegression().fit(x_poly, y.reshape(-1, 1)).predict(x_poly)
 plt.rcParams['figure.figsize'] = (10, 8)
 plt.plot(x, y)
 plt.plot(x, y_poly)
-plt.title('Global Weekly Alerts (PyPI)')
-plt.xlabel('Popularity Threshold (Weekly Downloads)')
-plt.ylabel('Number of alerts')
+plt.title('Percentage of Downloads that Trigger Alerts vs Popularity (PyPI)')
+plt.xlabel('Popularity Threshold (Number of Weekly Downloads)')
+plt.ylabel('Percentage of Weekly Downloads that Trigger Alerts (%)')
 plt.xlim(x_begin, x_end)
 plt.show()

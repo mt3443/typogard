@@ -1,3 +1,5 @@
+// Command line tool which gets all transitive dependencies for a given npm package
+
 if (process.argv[2] == undefined) {
     console.log('Usage: node get_npm_deps_cli.js [package_name]');
     process.exit(1);

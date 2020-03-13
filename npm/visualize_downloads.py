@@ -1,3 +1,5 @@
+# Generates download distribution figure for npm
+
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -18,35 +20,18 @@ def pie():
     f = 0
 
     for i in download_counts:
-        # 0 - 10
-        if i < 11:
+        if i <= 10:
             a += 1
-            continue
-
-        # 11 - 100
-        if i >= 11 and i <= 100:
+        elif i <= 100:
             b += 1
-            continue
-        
-        # 101 - 1,000
-        if i >= 101 and i <= 1000:
+        elif i <= 1000:
             c += 1
-            continue
-
-        # 1,001 - 10,000
-        if i >= 1001 and i <= 10000:
+        elif i <= 10000:
             d += 1
-            continue
-
-        # 10,001 - 100,000
-        if i >= 10001 and i <= 100000:
+        elif i <= 100000:
             e += 1
-            continue
-
-        # 1000001+
-        if i > 100001:
+        else:
             f += 1
-            continue
 
     fig, ax = plt.subplots(subplot_kw=dict(aspect='equal'))
     plt.rcParams.update({'font.size': 18})

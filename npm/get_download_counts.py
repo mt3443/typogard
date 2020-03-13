@@ -1,3 +1,5 @@
+# Generates npm_download_counts.csv
+
 import requests
 import threading
 import sys
@@ -26,7 +28,6 @@ if os.path.exists('../data/npm_downloads'):
 			all_packages.remove(p)
 	all_packages = list(all_packages)
 
-# log = open('/volatile/m139t745/npm_downloads/{}'.format(node_name), 'a')
 log = open('../data/npm_downloads', 'a')
 downloads_url = 'https://api.npmjs.org/downloads/point/last-week/{}'
 

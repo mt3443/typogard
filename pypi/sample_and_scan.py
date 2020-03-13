@@ -1,3 +1,5 @@
+# Picks a number of packages at random and checks for typosquatting
+
 import os
 from numpy.random import choice
 import pandas as pd

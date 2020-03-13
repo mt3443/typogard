@@ -1,3 +1,5 @@
+# Selects a number of npm packages at random, transitively scans for typosquatting
+
 import os
 from numpy.random import choice
 import pandas as pd

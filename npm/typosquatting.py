@@ -1,3 +1,5 @@
+# Typosquatting Detection Scheme (npm)
+
 from itertools import groupby, permutations
 from functools import lru_cache
 import re

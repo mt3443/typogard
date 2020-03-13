@@ -1,3 +1,5 @@
+# Looks for typosquatting in the transitive dependencies of all packages for npm
+
 import json
 import os
 import re
@@ -9,16 +11,16 @@ all_packages = [x.split(',')[0] for x in open('../data/npm_download_counts.csv')
 random.shuffle(all_packages)
 
 # remove package names that have already been analyzed
-if os.path.exists('/volatile/m139t745/npm_dependencies'):
+if os.path.exists('/volatile/REDACTED/npm_dependencies'):
     print('Removing processed packages...', flush=True)
     all_packages_set = set(all_packages)
 
-    for f in os.listdir('/volatile/m139t745/npm_dependencies'):
-        file_contents = open('/volatile/m139t745/npm_dependencies/' + f).read()
+    for f in os.listdir('/volatile/REDACTED/npm_dependencies'):
+        file_contents = open('/volatile/REDACTED/npm_dependencies/' + f).read()
 
         if file_contents[-1] != '\n':
             file_contents = file_contents[:file_contents.rfind('\n')]
-            writer = open('/volatile/m139t745/npm_dependencies/' + f, 'w')
+            writer = open('/volatile/REDACTED/npm_dependencies/' + f, 'w')
             writer.write(file_contents + '\n')
             writer.close()
 
@@ -67,8 +69,8 @@ for node in unused_nodes:
     nodes_cores[name] = n_cores
     total_cores += int(n_cores)
 
-if not os.path.isdir('/volatile/m139t745/npm_dependencies'):
-    os.mkdir('/volatile/m139t745/npm_dependencies')
+if not os.path.isdir('/volatile/REDACTED/npm_dependencies'):
+    os.mkdir('/volatile/REDACTED/npm_dependencies')
 
 if not os.path.isdir('npm_dependencies'):
     os.mkdir('npm_dependencies')

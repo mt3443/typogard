@@ -8,4 +8,4 @@ node_name = sys.argv[1]
 n_threads = int(sys.argv[2])
 
 os.system('rm -rf /dev/shm/pypi')
-typosquatting.scan_all('cluster_input/{}'.format(node_name), '/volatile/m139t745/pypi_transitive/{}'.format(node_name), n_threads)
+typosquatting.scan_all('cluster_input/{}'.format(node_name), '/volatile/REDACTED/pypi_transitive/{}'.format(node_name), n_threads)

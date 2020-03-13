@@ -1,3 +1,5 @@
+# Modified npm cli (with typosquatting check) timing analysis. Compares to official npm cli
+
 import os
 import subprocess
 from time import perf_counter

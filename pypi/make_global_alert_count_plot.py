@@ -1,3 +1,6 @@
+# Generates the plot showing the percentage of all weekly downloads containing a typosquatting package
+# as a function of popularity threshold for PyPI
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle

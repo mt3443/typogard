@@ -1,3 +1,5 @@
+# Generates the plot showing percentage of all npm packages typosquatting as a function of popularity threshold
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle

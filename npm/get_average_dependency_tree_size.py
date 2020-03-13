@@ -1,3 +1,5 @@
+# Gets dependency tree statistics for npm
+
 from statistics import mean, median, mode
 import pickle
 

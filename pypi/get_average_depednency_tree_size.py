@@ -1,3 +1,5 @@
+# Gets transitive dependency statistics for PyPI
+
 from statistics import mean, median, mode
 import pickle
 

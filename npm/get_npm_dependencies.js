@@ -1,3 +1,5 @@
+// Generates npm_dependencies
+
 var ls = require('npm-remote-ls').ls;
 var config = require('npm-remote-ls').config;
 var fs = require('fs');
@@ -5,10 +7,10 @@ var fs = require('fs');
 var node_name = process.argv[2];
 
 // get the names of packages assigned to this node
-var todo_packages = fs.readFileSync('/users/m139t745/typosquatting/npm/npm_dependencies/' + node_name).toString().split(/\s+/);
+var todo_packages = fs.readFileSync('/users/REDACTED/typosquatting/npm/npm_dependencies/' + node_name).toString().split(/\s+/);
 
 // output file
-var output_stream = fs.createWriteStream('/volatile/m139t745/npm_dependencies/' + node_name, {'flags': 'a'})
+var output_stream = fs.createWriteStream('/volatile/REDACTED/npm_dependencies/' + node_name, {'flags': 'a'})
 
 // turn of dev dependencies
 config({

@@ -1,3 +1,5 @@
+# Typosquatting Detection Scheme (PyPI)
+
 from itertools import groupby, permutations
 from functools import lru_cache
 import re

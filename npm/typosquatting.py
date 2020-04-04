@@ -11,6 +11,8 @@ version_number_regex = re.compile('^(.*?)[\.|\-|_]?\d$')
 
 scope_regex = re.compile('^@(.*?)/.+$')
 
+allowed_characters = 'abcdefghijklmnopqrstuvwxyz1234567890.-_'
+
 typos = {
     '1': ['2', 'q', 'i', 'l'],
     '2': ['1', 'q', 'w', '3'],
@@ -79,24 +81,24 @@ def repeated_characters(package_name, package_list=popular_packages):
 
     return None
         
-# 'event-streaem' => 'event-stream'
-# 'event-stream' => 'event-strem'
+# 'evnt-stream' -> 'event-stream'
 def omitted_chars(package_name, return_all=False, package_list=popular_packages):
 
-    if len(package_name) < 7:
+    if len(package_name) < 4:
         return None
 
     if return_all:
         candidates = []
 
     for i in range(len(package_name)):
-        s = package_name[:i] + package_name[(i + 1):]
+        for c in allowed_characters:
+            s = package_name[:i] + c + package_name[i:]
 
-        if s in package_list and not same_scope(package_name, s) and s != package_name:
-            if return_all:
-                candidates.append(s)
-            else:
-                return s
+            if s in package_list and not same_scope(package_name, s) and s != package_name:
+                if return_all:
+                    candidates.append(s)
+                else:
+                    return s
 
     if return_all and candidates != []:
         return candidates

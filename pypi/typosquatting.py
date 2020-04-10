@@ -1,6 +1,6 @@
 # Typosquatting Detection Scheme (PyPI)
 
-from itertools import groupby, permutations
+from itertools import permutations
 from functools import lru_cache
 import re
 
@@ -64,12 +64,24 @@ all_packages = None
 def same_name(p1, p2):
     return re.sub(r'[-_.]+', '-', p1).lower() == re.sub(r'[-_.]+', '-', p2).lower()
 
-# 'reeaaaccct' => 'react'
-def repeated_characters(package_name, package_list=popular_packages):
-    s = ''.join([i[0] for i in groupby(package_name)])
+# 'reeact' => 'react'
+def repeated_characters(package_name, return_all=False, package_list=popular_packages):
+
+    if return_all:
+        candidates = []
+
+    for i, c in enumerate(package_name):
+        if i + 1 < len(package_name) and package_name[i + 1] == c:
+            s = package_name[:i] + package_name[i + 1:]
     
-    if s in package_list and not same_name(package_name, s):
-        return s
+            if s in package_list and not same_name(package_name, s):
+                if return_all:
+                    candidates.append(s)
+                else:
+                    return s
+
+    if return_all and candidates != []:
+        return candidates
 
     return None
         
@@ -86,7 +98,7 @@ def omitted_chars(package_name, return_all=False, package_list=popular_packages)
         for c in allowed_characters:
             s = package_name[:i] + c + package_name[i:]
 
-            if s in package_list and not same_scope(package_name, s) and s != package_name:
+            if s in package_list and not same_name(package_name, s):
                 if return_all:
                     candidates.append(s)
                 else:
@@ -227,7 +239,7 @@ def run_tests_show_all(package_name):
         scan_all_init()
 
     results = [
-        repeated_characters(package_name, package_list=all_packages),
+        repeated_characters(package_name, return_all=True, package_list=all_packages),
         omitted_chars(package_name, return_all=True, package_list=all_packages),
         swapped_characters(package_name, return_all=True, package_list=all_packages),
         swapped_words(package_name, return_all=True, package_list=all_packages),

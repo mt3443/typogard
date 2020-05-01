@@ -102,7 +102,7 @@ def omitted_chars(package_name, return_all=False, package_list=popular_packages)
     if return_all:
         candidates = []
 
-    for i in range(len(package_name)):
+    for i in range(len(package_name) + 1):
         for c in allowed_characters:
             s = package_name[:i] + c + package_name[i:]
 

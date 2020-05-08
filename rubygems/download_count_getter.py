@@ -14,9 +14,6 @@ for line in lines:
 	package = line.split()[0]
 	version = line.split()[1].replace('(', '').replace(')', '')
 
-	if package in preprocessed:
-		continue
-
 	r = requests.get('https://rubygems.org/api/v1/downloads/{}-{}.json'.format(package, version))
 
 	if r.status_code != 200:

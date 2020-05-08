@@ -1,51 +1,69 @@
-import time
-import requests
-import datetime
+# Looks for typosquatting in the transitive dependencies of all packages for PyPI
 
-lines = open('../data/rubygems_package_names').read().splitlines()
-preprocessed = set([x.split()[0] for x in open('../data/rubygems_download_counts.csv')])
-output = open('../data/rubygems_download_counts.csv', 'a')
+import json
+import os
+import re
+import random
 
-today = datetime.datetime.today()
+n_nodes = 130
 
-for line in lines:
-	package = line.split()[0]
-	version = line.split()[1][1:-1]
+# get all packages
+print('Loading packages...', flush=True)
+all_packages = open('/users/m139t745/typosquatting/data/rubygems_package_names').read().splitlines()
+random.shuffle(all_packages)
 
-	if package in preprocessed:
-		continue
+print('Getting cluster info...', flush=True)
+os.system('scontrol show node > node_info')
+node_info = open('node_info', 'r').readlines()
 
-	r = requests.get('https://rubygems.org/api/v1/downloads/{}-{}.json'.format(package, version))
+all_nodes = []
 
-	if r.status_code != 200:
-		print('ERROR: STATUS CODE {} RETURNED FOR PACKAGE {} DOWNLOAD COUNT'.format(r.status_code, package))
-	else:
-		downloads = r.json()['total_downloads']
+current_node = ''
 
-		time.sleep(0.1)
-		# get package age
-		r = requests.get('https://rubygems.org/api/v1/versions/{}.json'.format(package))
+for line in node_info:
+    if line == '\n':
+        all_nodes.append(current_node)
+        current_node = ''
+    else:
+        current_node += line
 
-		if r.status_code != 200:
-			print('ERROR: STATUS CODE {} RETURNED FOR PACKAGE {} AGE'.format(r.status_code, package))
-		else:
+os.system('rm node_info')
 
-			start_date = r.json()[-1]['built_at']
-			year = int(start_date[:4])
-			month = int(start_date[5:7])
-			day = int(start_date[8:10])
+unused_nodes = []
 
-			birthday = datetime.datetime(year, month, day, 0, 0, 0)
+for node in all_nodes:
+    if 'CPUAlloc=0' in node and 'NodeName=g' not in node and 'NodeName=m' not in node and 'amd' not in node:
+        unused_nodes.append(node)
 
-			weeks_since = int((today - birthday).days / 7)
-			if weeks_since == 0:
-				downloads_per_week = int(downloads)
-			else:
-				downloads_per_week = int(int(downloads) / weeks_since)
+del all_nodes
 
-			output.write('{},{}\n'.format(package, downloads_per_week))
-			output.flush()
+unused_nodes = unused_nodes[-n_nodes:]
 
-	time.sleep(0.1)
+total_cores = 0
+total_packages = len(all_packages)
+nodes_cores = {}
 
-output.close()
+for node in unused_nodes:
+    name = re.findall(r'NodeName=(\S+)', node)[0]
+    n_cores = re.findall(r'CPUTot=(\d+)', node)[0]
+    nodes_cores[name] = n_cores
+    total_cores += int(n_cores)
+
+packages_per_node = int(total_packages / n_nodes) + 1
+
+# assign packages
+print('Assigning packages...', flush=True)
+for node in nodes_cores:
+    f = open('/volatile/m139t745/rubygems/input/{}'.format(node), 'w')
+    for _ in range(packages_per_node):
+        if (len(all_packages) == 0):
+            break
+        p = all_packages.pop()
+        f.write('{}\n'.format(p))
+    f.close()
+
+# start clients
+for node in nodes_cores:
+    os.system('srun -N 1 -n 1 -c {} -w {} --mem-per-cpu=2G -- python3 download_count_getter.py {} &'.format(nodes_cores[node], node, node))
+
+print('Job started')

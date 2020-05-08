@@ -15,9 +15,6 @@ def thread_target(lines):
 		package = line.split()[0]
 		version = line.split()[1].replace('(', '').replace(')', '')
 
-		if package in preprocessed:
-			continue
-
 		dependencies = set([package])
 		todo = [package]
 

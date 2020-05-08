@@ -53,7 +53,7 @@ packages_per_core = int(total_packages / total_cores) + 1
 print('Assigning packages...', flush=True)
 for node in nodes_cores:
     packages_for_this_node = packages_per_core * int(nodes_cores[node])
-    f = open('/voaltile/m139t745/rubygems/input/{}'.format(node), 'w')
+    f = open('/volatile/m139t745/rubygems/input/{}'.format(node), 'w')
     for _ in range(packages_for_this_node):
         if (len(all_packages) == 0):
             break

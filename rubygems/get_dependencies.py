@@ -10,6 +10,19 @@ print('Loading packages...', flush=True)
 all_packages = open('/users/m139t745/typosquatting/data/rubygems_package_names').read().splitlines()
 random.shuffle(all_packages)
 
+# remove preprocessed packages
+preprocessed = set()
+if os.path.exists('/volatile/m139t745/rubygems/output'):
+    print('Removing preprocessed packages', flush=True)
+
+    for f in os.listdir('/volatile/m139t745/rubygems/output'):
+        file_contents = open('/volatile/m139t745/rubygems/output/' + f).read().splitlines()
+
+        for line in file_contents:
+            package = line.split(',')[0]
+            preprocessed.add(package)
+
+
 print('Getting cluster info...', flush=True)
 os.system('scontrol show node > node_info')
 node_info = open('node_info', 'r').readlines()
@@ -50,6 +63,7 @@ for node in unused_nodes:
 packages_per_core = int(total_packages / total_cores) + 1
 
 # assign packages
+removed_packages = 0
 print('Assigning packages...', flush=True)
 for node in nodes_cores:
     packages_for_this_node = packages_per_core * int(nodes_cores[node])
@@ -58,8 +72,13 @@ for node in nodes_cores:
         if (len(all_packages) == 0):
             break
         p = all_packages.pop()
+        if p.split()[0] in preprocessed:
+            removed_packages += 1
+            continue
         f.write('{}\n'.format(p))
     f.close()
+
+print('Removed {} preprocessed packages'.format(removed_packages), flush=True)
 
 # start clients
 for node in nodes_cores:

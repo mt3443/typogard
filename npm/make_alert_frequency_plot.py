@@ -7,12 +7,10 @@ import os
 
 import sys
 
-if sys.argv[1] is None:
-    exit()
-
 # file name for pickled results
-output_filename = '../pickle/npm_alert_frequency_plot_{}.p'.format(sys.argv[1])
-output_filename_pypi = '../pickle/pypi_alert_frequency_plot_{}.p'.format(sys.argv[1])
+output_filename = '../pickle/npm_alert_frequency_plot_{}.p'.format('100k')
+output_filename_pypi = '../pickle/pypi_alert_frequency_plot_{}.p'.format('100k')
+output_filename_rubygems = '../pickle/rubygems_alert_frequency_plot_{}.p'.format('100k')
 
 # download count dict pickled object
 dl_count_dict_pickle_name = '../pickle/npm_dl_count_dict.p'
@@ -21,7 +19,7 @@ if not os.path.exists(output_filename):
 
     # x axis values, popularity threshold
     x_begin = 350
-    x_end = 1000000
+    x_end = 100000
     x = list(range(x_begin, x_end, int((x_end - x_begin) / 100)))
 
     # raw data
@@ -93,6 +91,7 @@ if not os.path.exists(output_filename):
 else:
     npm_x_begin, npm_x_end, npm_x, npm_y = pickle.load(open(output_filename, 'rb'))
     pypi_x_begin, pypi_x_end, pypi_x, pypi_y = pickle.load(open(output_filename_pypi, 'rb'))
+    rubygems_x_begin, rubygems_x_end, rubygems_x, rubygems_y = pickle.load(open(output_filename_rubygems, 'rb'))
 
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
@@ -108,6 +107,9 @@ npm_y_poly = LinearRegression().fit(npm_x_poly, npm_y.reshape(-1, 1)).predict(np
 pypi_x = np.array(pypi_x)
 pypi_y = np.array(pypi_y)
 
+rubygems_x = np.array(rubygems_x)
+rubygems_y = np.array(rubygems_y)
+
 poly_reg = PolynomialFeatures()
 pypi_x_poly = poly_reg.fit_transform(pypi_x.reshape(-1, 1))
 pypi_y_poly = LinearRegression().fit(pypi_x_poly, pypi_y.reshape(-1, 1)).predict(pypi_x_poly)
@@ -117,9 +119,11 @@ plt.rcParams.update({'font.size': 18})
 plt.plot(npm_x, npm_y, color='red', label='npm')
 # plt.plot(npm_x, npm_y_poly)
 plt.plot(pypi_x, pypi_y, color='blue', label='PyPI')
+plt.plot(rubygems_x, rubygems_y, color='green', label='RubyGems')
 # plt.title('Percent Typosquatting vs Target Popularity')
 plt.xlabel('Popularity Threshold (Weekly Downloads)')
 plt.ylabel('Typosquatting Perpetrators (% of All Packages)')
 plt.xlim(npm_x_begin, npm_x_end)
 plt.legend()
+plt.savefig('repository_percentage.pdf')
 plt.show()

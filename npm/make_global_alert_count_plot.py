@@ -6,15 +6,12 @@ import pandas as pd
 import pickle
 import os
 
-import sys
-
-if sys.argv[1] is None:
-    exit()
+x_max = '100k'
 
 # results pickle file name
-output_filename = '../pickle/npm_global_alert_output_{}.p'.format(sys.argv[1])
-output_filename_pypi = '../pickle/pypi_global_alert_output_{}.p'.format(sys.argv[1])
-output_filename_rubygems = '../pickle/rubygems_global_alert_output_{}.p'.format(sys.argv[1])
+output_filename = '../pickle/npm_global_alert_output_{}.p'.format(x_max)
+output_filename_pypi = '../pickle/pypi_global_alert_output_{}.p'.format(x_max)
+output_filename_rubygems = '../pickle/rubygems_global_alert_output_{}.p'.format(x_max)
 
 # download counts python dictionary pickle name
 dl_count_dict_pickle_name = '../pickle/npm_dl_count_dict.p'
@@ -105,16 +102,10 @@ else:
     pypi_x_begin, pypi_x_end, pypi_x, pypi_y = pickle.load(open(output_filename_pypi, 'rb'))
     rubygems_x_begin, rubygems_x_end, rubygems_x, rubygems_y = pickle.load(open(output_filename_rubygems, 'rb'))
 
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.linear_model import LinearRegression
 import numpy as np
 
 x = np.array(x)
 y = np.array(y)
-
-poly_reg = PolynomialFeatures()
-x_poly = poly_reg.fit_transform(x.reshape(-1, 1))
-y_poly = LinearRegression().fit(x_poly, y.reshape(-1, 1)).predict(x_poly)
 
 pypi_x = np.array(pypi_x)
 pypi_y = np.array(pypi_y)
@@ -122,17 +113,11 @@ pypi_y = np.array(pypi_y)
 rubygems_x = np.array(rubygems_x)
 rubygems_y = np.array(rubygems_y)
 
-poly_reg = PolynomialFeatures()
-pypi_x_poly = poly_reg.fit_transform(pypi_x.reshape(-1, 1))
-pypi_y_poly = LinearRegression().fit(pypi_x_poly, pypi_y.reshape(-1, 1)).predict(pypi_x_poly)
-
 plt.rcParams['figure.figsize'] = (10, 8)
 plt.rcParams.update({'font.size': 18})
 plt.plot(x, y, color='red', label='npm')
-# plt.plot(x, y_poly)
 plt.plot(pypi_x, pypi_y, color='blue', label='PyPI')
 plt.plot(rubygems_x, rubygems_y, color='green', label='RubyGems')
-# plt.title('Percentage of Downloads that Trigger Alerts vs Popularity')
 plt.xlabel('Popularity Threshold (Weekly Downloads)')
 plt.ylabel('Typosquatting Downloads (% of All Downloads)')
 plt.xlim(x_begin, x_end)

@@ -1,7 +1,14 @@
-data/npm_transitive_results
-data/pypi_transitive_results
-data/npm_dependencies
-data/pypi_dependencies
-pickle/npm_dl_count_dict.p
-pickle/pypi_dl_count_dict.p
-__pycache__
+# Large temporary files used for graph/figure generation
+paper/data/npm_transitive_results
+paper/data/pypi_transitive_results
+paper/data/npm_dependencies
+paper/data/pypi_dependencies
+paper/pickle/npm_dl_count_dict.p
+paper/pickle/pypi_dl_count_dict.p
+
+# Node.js files
+package.json
+node_modules/
+
+# VS Code settings
+.vscode/

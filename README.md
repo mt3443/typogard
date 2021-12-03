@@ -24,3 +24,7 @@ If one would like to determine whether the theoretical package `event_stream` is
 `python3 typogard_npm.py popular_npm_packages_sample.txt event_stream`
 
 This will notify the user that `event_stream` could be typosquatting the popular package `event-stream`.
+
+## Integration with npm
+
+We have included a proof-of-concept modified version of the npm package installer which runs TypoGard prior to installation. You can find it under _paper/npm/modified_installer.zip_.

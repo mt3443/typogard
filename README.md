@@ -1,5 +1,5 @@
 # TypoGard
-TypoGard is a client-side tool created to protect users from [package typosquatting attacks](https://snyk.io/blog/typosquatting-attacks/). TypoGard can was originally implemented as a standalone tool for npm, but it can easily be extended to other languages and can even be embedded in package installation software.
+TypoGard is a client-side tool created to protect users from [package typosquatting attacks](https://snyk.io/blog/typosquatting-attacks/). TypoGard was originally implemented as a standalone tool for npm, but it can easily be extended to other languages and can even be embedded in package installation software.
 
 ## How TypoGard Works
 TypoGard works by applying a number of transformations to a given package name and comparing the results to a list of popular package names. These transformations are based on the same transformations made by malicious actors in past package typosquatting attacks. For more detailed information, read the [TypoGard paper on arXiv](https://arxiv.org/abs/2003.03471) (the tool was referred to as SpellBound at the time of publication).
